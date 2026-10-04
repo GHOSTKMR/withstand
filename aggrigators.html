@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="htmlRoot">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Wrap & Go | Corporate Aggregators</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --bg-body: #f4f7fc;
+      --bg-card: #ffffff;
+      --text-primary: #1e293b;
+      --text-secondary: #475569;
+      --border-light: #e2e8f0;
+      --shadow-sm: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+      --shadow-hover: 0 20px 30px -10px rgba(0, 0, 0, 0.15);
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --header-bg: rgba(255, 255, 255, 0.8);
+      --toggle-bg: #e2e8f0;
+      --toggle-knob: #ffffff;
+      --card-radius: 24px;
+      --orange: #f97316;
+      --orange-soft: #ffedd5;
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0f172a;
+      --bg-card: #1e293b;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --border-light: #334155;
+      --shadow-sm: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+      --shadow-hover: 0 20px 30px -10px rgba(0, 0, 0, 0.7);
+      --accent: #3b82f6;
+      --accent-soft: #1e3a8a;
+      --header-bg: rgba(15, 23, 42, 0.8);
+      --toggle-bg: #334155;
+      --toggle-knob: #f1f5f9;
+      --orange: #fb923c;
+      --orange-soft: #7c2d12;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-primary);
+      transition: background-color 0.3s ease, color 0.2s ease;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    [dir="rtl"] { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; }
+
+    .app-container {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ---------- Header ---------- */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+      background: var(--header-bg);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 1rem 1.75rem;
+      border-radius: 60px;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .logo-area { display: flex; align-items: center; gap: 0.75rem; }
+
+    .logo-icon { font-size: 1.8rem; color: var(--orange); }
+
+    .logo-text {
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .controls { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+
+    .lang-toggle {
+      display: flex;
+      background: var(--toggle-bg);
+      border-radius: 40px;
+      padding: 0.25rem;
+      border: 1px solid var(--border-light);
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: none;
+      padding: 0.6rem 1.4rem;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .lang-btn.active {
+      background: var(--bg-card);
+      color: var(--orange);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .lang-btn:hover:not(.active) { color: var(--text-primary); }
+
+    .theme-toggle {
+      background: var(--toggle-bg);
+      border: 1px solid var(--border-light);
+      width: 56px;
+      height: 32px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+      position: relative;
+    }
+
+    .theme-toggle i {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      transition: opacity 0.2s, transform 0.2s;
+      width: 20px;
+      text-align: center;
+    }
+
+    .theme-toggle .fa-sun { opacity: 1; }
+    .theme-toggle .fa-moon { opacity: 0.4; }
+    [data-theme="dark"] .theme-toggle .fa-sun { opacity: 0.4; }
+    [data-theme="dark"] .theme-toggle .fa-moon { opacity: 1; }
+
+    .toggle-knob {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 26px;
+      height: 26px;
+      background: var(--toggle-knob);
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    [data-theme="dark"] .toggle-knob { transform: translateX(24px); }
+
+    /* ---------- Top Bar: Wrap & Go logo + aggregator names ---------- */
+    .brand-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.75rem 1.5rem;
+      margin-bottom: 2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 28px;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+
+    .wrapgo-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 800;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      letter-spacing: -0.03em;
+      color: var(--orange);
+      line-height: 1;
+    }
+
+    .wrapgo-logo i {
+      font-size: 1em;
+    }
+
+    .aggregator-names {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 0.6rem 1.5rem;
+      max-width: 900px;
+    }
+
+    .aggregator-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--orange);
+      letter-spacing: 0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+
+    .aggregator-name i {
+      font-size: 0.85rem;
+      opacity: 0.85;
+    }
+
+    /* separator dots between names */
+    .aggregator-name::after {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--orange);
+      opacity: 0.4;
+      margin-left: 1.5rem;
+      margin-right: -1rem;
+    }
+
+    .aggregator-name:last-child::after {
+      display: none;
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto;
+      opacity: 0.9;
+    }
+
+    /* ---------- Aggregators Grid ---------- */
+    .aggregators-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      justify-content: center;
+      align-items: stretch;
+      margin-top: 0.5rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--card-radius);
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s ease, box-shadow 0.3s ease, border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100%;
+      backdrop-filter: blur(2px);
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--orange);
+    }
+
+    .card-image {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(135deg, #eef2f6 0%, #d9e2ec 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    [data-theme="dark"] .card-image {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    }
+
+    .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+      pointer-events: none;
+    }
+
+    .card-content {
+      padding: 1.5rem 1.5rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-title i {
+      color: var(--orange) !important;
+      font-size: 1.2rem;
+    }
+
+    .card-description {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      flex: 1;
+      opacity: 0.9;
+    }
+
+    .card-badge {
+      display: inline-block;
+      background: var(--orange-soft);
+      color: var(--orange);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      border-radius: 40px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.75rem;
+      align-self: flex-start;
+    }
+
+    .footer-note {
+      margin-top: 3rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      opacity: 0.7;
+      border-top: 1px solid var(--border-light);
+      padding-top: 1.5rem;
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 0.75rem; }
+      .header {
+        padding: 0.9rem 1.25rem;
+        border-radius: 40px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+      .logo-area { justify-content: center; }
+      .controls { justify-content: center; }
+      .hero h1 { font-size: 1.9rem; }
+      .aggregators-grid { gap: 1.25rem; }
+      .card-content { padding: 1.25rem; }
+      .brand-bar { padding: 1.25rem 1rem; gap: 0.85rem; }
+      .aggregator-names { gap: 0.5rem 1rem; }
+      .aggregator-name { font-size: 0.9rem; }
+      .aggregator-name::after {
+        margin-left: 1rem;
+        margin-right: -0.75rem;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .lang-btn { padding: 0.5rem 1rem; font-size: 0.8rem; }
+      .logo-text { font-size: 1.1rem; }
+      .aggregator-name { font-size: 0.85rem; }
+      .aggregator-name::after { display: none; }
+    }
+
+    [dir="rtl"] .card-title,
+    [dir="rtl"] .card-description,
+    [dir="rtl"] .hero h1,
+    [dir="rtl"] .hero p {
+      text-align: right;
+    }
+
+    [dir="rtl"] .card-badge { align-self: flex-end; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <div class="logo-area">
+        <i class="fas fa-cubes logo-icon"></i>
+        <span class="logo-text" data-i18n="appName">AggreGate</span>
+      </div>
+      <div class="controls">
+        <div class="lang-toggle" role="group" aria-label="Language selector">
+          <button class="lang-btn active" id="langEn" aria-pressed="true">EN</button>
+          <button class="lang-btn" id="langAr" aria-pressed="false">عربي</button>
+        </div>
+        <div class="theme-toggle" id="themeToggle" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle dark mode">
+          <i class="fas fa-sun"></i>
+          <i class="fas fa-moon"></i>
+          <div class="toggle-knob"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Top: Wrap & Go logo + wrapping aggregator names (no hyperlinks) -->
+    <section class="brand-bar" aria-label="Wrap and Go brand">
+      <div class="wrapgo-logo">
+        <i class="fas fa-utensils"></i>
+        <span data-i18n="wrapgo">Wrap &amp; Go</span>
+      </div>
+      <div class="aggregator-names">
+        <span class="aggregator-name"><i class="fas fa-utensils"></i> Talabat</span>
+        <span class="aggregator-name"><i class="fas fa-shopping-basket"></i> Sonunu</span>
+        <span class="aggregator-name"><i class="fas fa-motorcycle"></i> Rafeeq</span>
+        <span class="aggregator-name"><i class="fas fa-bolt"></i> Keeta</span>
+        <span class="aggregator-name"><i class="fas fa-mug-hot"></i> Beanz</span>
+      </div>
+    </section>
+
+    <section class="hero">
+      <h1 data-i18n="heroTitle">All your aggregators in one place</h1>
+      <p data-i18n="heroSub">Talabat, Sonunu, Rafeeq, Keeta &amp; Beanz — seamless, fast, and unified.</p>
+    </section>
+
+    <div class="aggregators-grid">
+      <!-- Talabat -->
+      <div class="card">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1526367790999-0150786686a2?w=800&auto=format&fit=crop&q=80" alt="Talabat food delivery" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="card-badge" data-i18n="badgeFood">Food</span>
+          <h3 class="card-title">
+            <i class="fas fa-utensils"></i>
+            <span data-i18n="talabat">Talabat</span>
+          </h3>
+          <p class="card-description" data-i18n="talabatDesc">Order food from your favorite restaurants, fast and reliable.</p>
+        </div>
+      </div>
+
+      <!-- Sonunu -->
+      <div class="card">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80" alt="Sonunu groceries" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="card-badge" data-i18n="badgeGrocery">Grocery</span>
+          <h3 class="card-title">
+            <i class="fas fa-shopping-basket"></i>
+            <span data-i18n="sonunu">Sonunu</span>
+          </h3>
+          <p class="card-description" data-i18n="sonunuDesc">Fresh groceries and daily essentials delivered to your door.</p>
+        </div>
+      </div>
+
+      <!-- Rafeeq -->
+      <div class="card">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=800&auto=format&fit=crop&q=80" alt="Rafeeq delivery" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="card-badge" data-i18n="badgeDelivery">Delivery</span>
+          <h3 class="card-title">
+            <i class="fas fa-motorcycle"></i>
+            <span data-i18n="rafeeq">Rafeeq</span>
+          </h3>
+          <p class="card-description" data-i18n="rafeeqDesc">Your trusted companion for local deliveries and errands.</p>
+        </div>
+      </div>
+
+      <!-- Keeta -->
+      <div class="card">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80" alt="Keeta food delivery" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="card-badge" data-i18n="badgeFood">Food</span>
+          <h3 class="card-title">
+            <i class="fas fa-bolt"></i>
+            <span data-i18n="keeta">Keeta</span>
+          </h3>
+          <p class="card-description" data-i18n="keetaDesc">Fast food delivery powered by AI. Quick, reliable, and efficient.</p>
+        </div>
+      </div>
+
+      <!-- Beanz -->
+      <div class="card">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&auto=format&fit=crop&q=80" alt="Beanz coffee" loading="lazy">
+        </div>
+        <div class="card-content">
+          <span class="card-badge" data-i18n="badgeCoffee">Coffee</span>
+          <h3 class="card-title">
+            <i class="fas fa-mug-hot"></i>
+            <span data-i18n="beanz">Beanz</span>
+          </h3>
+          <p class="card-description" data-i18n="beanzDesc">Order ahead from specialty coffee shops, skip the line, earn rewards.</p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer-note">
+      <p data-i18n="footerText">All aggregators in one unified corporate view.</p>
+    </footer>
+  </div>
+
+  <script>
+    (function() {
+      const translations = {
+        en: {
+          appName: "AggreGate",
+          wrapgo: "Wrap & Go",
+          heroTitle: "All your aggregators in one place",
+          heroSub: "Talabat, Sonunu, Rafeeq, Keeta & Beanz — seamless, fast, and unified.",
+          badgeFood: "Food",
+          badgeGrocery: "Grocery",
+          badgeDelivery: "Delivery",
+          badgeCoffee: "Coffee",
+          talabat: "Talabat",
+          talabatDesc: "Order food from your favorite restaurants, fast and reliable.",
+          sonunu: "Sonunu",
+          sonunuDesc: "Fresh groceries and daily essentials delivered to your door.",
+          rafeeq: "Rafeeq",
+          rafeeqDesc: "Your trusted companion for local deliveries and errands.",
+          keeta: "Keeta",
+          keetaDesc: "Fast food delivery powered by AI. Quick, reliable, and efficient.",
+          beanz: "Beanz",
+          beanzDesc: "Order ahead from specialty coffee shops, skip the line, earn rewards.",
+          footerText: "All aggregators in one unified corporate view."
+        },
+        ar: {
+          appName: "أجريجيت",
+          wrapgo: "راب آند جو",
+          heroTitle: "جميع مجمعاتك في مكان واحد",
+          heroSub: "طلبات، سنونو، رفيق، كيتا وبينز — سلس، سريع، وموحد.",
+          badgeFood: "طعام",
+          badgeGrocery: "بقالة",
+          badgeDelivery: "توصيل",
+          badgeCoffee: "قهوة",
+          talabat: "طلبات",
+          talabatDesc: "اطلب الطعام من مطاعمك المفضلة، بسرعة وموثوقية.",
+          sonunu: "سنونو",
+          sonunuDesc: "بقالة طازجة ومستلزمات يومية تصلك إلى بابك.",
+          rafeeq: "رفيق",
+          rafeeqDesc: "رفيقك الموثوق للتوصيلات المحلية والمشاوير.",
+          keeta: "كيتا",
+          keetaDesc: "توصيل طعام سريع مدعوم بالذكاء الاصطناعي. سريع وموثوق وفعّال.",
+          beanz: "بينز",
+          beanzDesc: "اطلب مسبقًا من المقاهي المختصة، تخطى الطابور، واكسب المكافآت.",
+          footerText: "جميع المجمعات في عرض مؤسسي موحد."
+        }
+      };
+
+      const htmlRoot = document.getElementById('htmlRoot');
+      const langEnBtn = document.getElementById('langEn');
+      const langArBtn = document.getElementById('langAr');
+      const themeToggle = document.getElementById('themeToggle');
+      const i18nElements = document.querySelectorAll('[data-i18n]');
+
+      let currentLang = 'en';
+      let currentTheme = 'light';
+
+      try {
+        const savedLang = localStorage.getItem('aggregator-lang');
+        const savedTheme = localStorage.getItem('aggregator-theme');
+        if (savedLang === 'ar' || savedLang === 'en') currentLang = savedLang;
+        if (savedTheme === 'dark' || savedTheme === 'light') currentTheme = savedTheme;
+      } catch (e) {}
+
+      function updateLanguage() {
+        htmlRoot.lang = currentLang === 'ar' ? 'ar' : 'en';
+        htmlRoot.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+
+        langEnBtn.classList.toggle('active', currentLang === 'en');
+        langArBtn.classList.toggle('active', currentLang === 'ar');
+        langEnBtn.setAttribute('aria-pressed', currentLang === 'en');
+        langArBtn.setAttribute('aria-pressed', currentLang === 'ar');
+
+        i18nElements.forEach(el => {
+          const key = el.getAttribute('data-i18n');
+          if (translations[currentLang] && translations[currentLang][key]) {
+            el.textContent = translations[currentLang][key];
+          }
+        });
+
+        const themeLabel = currentLang === 'ar' 
+          ? (currentTheme === 'dark' ? 'التبديل إلى الوضع الفاتح' : 'التبديل إلى الوضع الداكن')
+          : (currentTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+        themeToggle.setAttribute('aria-label', themeLabel);
+
+        try { localStorage.setItem('aggregator-lang', currentLang); } catch (e) {}
+      }
+
+      function updateTheme() {
+        if (currentTheme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          themeToggle.setAttribute('aria-checked', 'true');
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          themeToggle.setAttribute('aria-checked', 'false');
+        }
+
+        const themeLabel = currentLang === 'ar' 
+          ? (currentTheme === 'dark' ? 'التبديل إلى الوضع الفاتح' : 'التبديل إلى الوضع الداكن')
+          : (currentTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+        themeToggle.setAttribute('aria-label', themeLabel);
+
+        try { localStorage.setItem('aggregator-theme', currentTheme); } catch (e) {}
+      }
+
+      langEnBtn.addEventListener('click', () => {
+        if (currentLang !== 'en') { currentLang = 'en'; updateLanguage(); }
+      });
+
+      langArBtn.addEventListener('click', () => {
+        if (currentLang !== 'ar') { currentLang = 'ar'; updateLanguage(); }
+      });
+
+      function toggleTheme() {
+        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+        updateTheme();
+      }
+
+      themeToggle.addEventListener('click', toggleTheme);
+      themeToggle.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTheme(); }
+      });
+
+      if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.setAttribute('aria-checked', 'true');
+      }
+
+      updateLanguage();
+      updateTheme();
+    })();
+  </script>
+</body>
+</html>

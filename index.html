@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Wrap & Go! · With Stand</title>
+    <!-- Bootstrap 5 (2026 stable) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Premium Fonts: Outfit, Inter, Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================================
+           DESIGN TOKENS – CORPORATE ELEGANCE
+           ============================================================ */
+        :root {
+            --bg: #f6f8fc;
+            --bg-gradient: radial-gradient(circle at 10% 20%, rgba(26, 59, 93, 0.03) 0%, transparent 50%),
+                           radial-gradient(circle at 90% 80%, rgba(212, 163, 115, 0.04) 0%, transparent 50%);
+            --surface: rgba(255, 255, 255, 0.85);
+            --surface-solid: #ffffff;
+            --text: #0b1a2e;
+            --text-secondary: #4a5a70;
+            --text-muted: #7a8aa0;
+            --border: rgba(26, 59, 93, 0.08);
+            --border-strong: rgba(26, 59, 93, 0.15);
+            --primary: #1a3b5d;
+            --primary-light: #2c5a7a;
+            --primary-glow: rgba(26, 59, 93, 0.25);
+            --accent: #c9945e;
+            --accent-light: #d4a373;
+            --accent-glow: rgba(201, 148, 94, 0.3);
+            --orange: #e87a3e;
+            --orange-light: #f09458;
+            --grey-text: #8a96a8;
+            --grey-text-dark: #6b7a90;
+            --shadow-sm: 0 2px 8px rgba(26, 59, 93, 0.04);
+            --shadow-md: 0 8px 30px rgba(26, 59, 93, 0.07);
+            --shadow-lg: 0 20px 60px rgba(26, 59, 93, 0.1);
+            --shadow-glow: 0 0 40px rgba(26, 59, 93, 0.08);
+            --clock-bg: linear-gradient(135deg, #1a3b5d 0%, #2c5a7a 100%);
+            --clock-text: #f0f4f8;
+            --input-bg: rgba(246, 248, 252, 0.8);
+            --card-radius: 28px;
+            --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-display: 'Outfit', 'Cairo', sans-serif;
+            --font-elegant: 'Playfair Display', 'Cairo', serif;
+            --font-body: 'Inter', 'Cairo', sans-serif;
+        }
+
+        body.dark {
+            --bg: #0a1628;
+            --bg-gradient: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
+                           radial-gradient(circle at 90% 80%, rgba(201, 148, 94, 0.05) 0%, transparent 50%);
+            --surface: rgba(20, 35, 58, 0.85);
+            --surface-solid: #14233a;
+            --text: #eaf0f8;
+            --text-secondary: #a8bcd4;
+            --text-muted: #6e829c;
+            --border: rgba(168, 188, 212, 0.1);
+            --border-strong: rgba(168, 188, 212, 0.18);
+            --primary: #4a8fd4;
+            --primary-light: #6ba6e3;
+            --primary-glow: rgba(74, 143, 212, 0.3);
+            --accent: #e0aa6e;
+            --accent-light: #f0c090;
+            --accent-glow: rgba(224, 170, 110, 0.25);
+            --orange: #f09458;
+            --orange-light: #f5a870;
+            --grey-text: #9aa8bc;
+            --grey-text-dark: #7a8aa0;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 40px rgba(74, 143, 212, 0.1);
+            --clock-bg: linear-gradient(135deg, #0a1628 0%, #14233a 100%);
+            --clock-text: #d0e0f0;
+            --input-bg: rgba(10, 22, 40, 0.6);
+        }
+
+        /* ============================================================
+           BASE & RESET
+           ============================================================ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            background-image: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text);
+            transition: background var(--transition), color var(--transition);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(80px);
+            opacity: 0.35;
+            transition: opacity 0.6s ease;
+        }
+
+        body::before {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            animation: floatOrb 18s ease-in-out infinite;
+        }
+
+        body::after {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            bottom: -80px;
+            left: -80px;
+            animation: floatOrb 22s ease-in-out infinite reverse;
+        }
+
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(40px, -30px) scale(1.1); }
+            66% { transform: translate(-30px, 30px) scale(0.95); }
+        }
+
+        /* ============================================================
+           TOP CLOCK BAR
+           ============================================================ */
+        .top-clock-bar {
+            background: var(--clock-bg);
+            color: var(--clock-text);
+            padding: 12px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+            transition: background var(--transition), box-shadow var(--transition);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .top-clock-bar::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        }
+
+        .clock-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .device-clock {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            font-variant-numeric: tabular-nums;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 22px;
+            border-radius: 60px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all var(--transition-fast);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .device-clock:hover {
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 0 20px rgba(255,255,255,0.05);
+        }
+
+        .device-clock i {
+            font-size: 1.2rem;
+            opacity: 0.85;
+            animation: clockPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes clockPulse {
+            0%, 100% { opacity: 0.85; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .btn-top {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--clock-text);
+            border-radius: 60px;
+            padding: 8px 20px;
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-top::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+        }
+
+        .btn-top:hover {
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-top:hover::before {
+            opacity: 1;
+        }
+
+        .btn-top:active {
+            transform: translateY(0) scale(0.97);
+        }
+
+        /* ============================================================
+           MAIN CONTAINER
+           ============================================================ */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            flex: 1;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================================
+           BRAND HEADER – WITH STAND + Wrap & Go!
+           ============================================================ */
+        .brand-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== WITH STAND – 3D LIGHTENING BORDER + SHADOW EFFECT ===== */
+        .brand-company {
+            font-family: var(--font-display);
+            font-size: 4.2rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--grey-text);
+            margin-bottom: 2px;
+            transition: color var(--transition);
+            display: block;
+            line-height: 1.1;
+            /* 3D pop-out shadow stack */
+            text-shadow:
+                0 1px 0 #ffffff,
+                0 2px 0 #e8edf5,
+                0 3px 0 #d0d8e4,
+                0 4px 0 #b8c4d4,
+                0 5px 0 #a0b0c4,
+                0 6px 0 #889cb4,
+                0 7px 0 #7088a4,
+                0 8px 0 #5c7894,
+                0 10px 12px rgba(26, 59, 93, 0.25),
+                0 14px 20px rgba(26, 59, 93, 0.2),
+                0 20px 35px rgba(26, 59, 93, 0.15),
+                0 30px 50px rgba(26, 59, 93, 0.1);
+            /* Lightening border effect via stroke */
+            -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.55);
+            paint-order: stroke fill;
+            filter: drop-shadow(0 0 20px rgba(180, 200, 230, 0.4));
+            position: relative;
+        }
+
+        /* Animated glowing border ring */
+        .brand-company::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 110%;
+            height: 130%;
+            border-radius: 20px;
+            background: radial-gradient(ellipse at center, rgba(180, 200, 230, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+            animation: brandGlow 4s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes brandGlow {
+            0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        body.dark .brand-company {
+            color: var(--grey-text-dark);
+            text-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.08),
+                0 2px 0 rgba(200, 215, 235, 0.06),
+                0 3px 0 rgba(180, 200, 225, 0.05),
+                0 4px 0 rgba(160, 185, 215, 0.04),
+                0 5px 0 rgba(140, 170, 205, 0.03),
+                0 6px 0 rgba(120, 155, 195, 0.03),
+                0 7px 0 rgba(100, 140, 185, 0.02),
+                0 8px 0 rgba(80, 125, 175, 0.02),
+                0 10px 12px rgba(0, 0, 0, 0.5),
+                0 14px 20px rgba(0, 0, 0, 0.4),
+                0 20px 35px rgba(0, 0, 0, 0.3),
+                0 30px 50px rgba(0, 0, 0, 0.2);
+            -webkit-text-stroke: 1.5px rgba(180, 200, 230, 0.15);
+            filter: drop-shadow(0 0 25px rgba(74, 143, 212, 0.2));
+        }
+
+        /* ===== Wrap & Go! – Smaller orange text ===== */
+        .brand-main {
+            font-family: var(--font-display);
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: var(--orange);
+            margin-bottom: 10px;
+            transition: color var(--transition), text-shadow var(--transition);
+            display: block;
+            line-height: 1.2;
+            text-shadow: 0 2px 8px rgba(232, 122, 62, 0.2);
+        }
+
+        body.dark .brand-main {
+            color: var(--orange-light);
+            text-shadow: 0 2px 12px rgba(240, 148, 88, 0.3);
+        }
+
+        .brand-main:hover {
+            text-shadow: 0 4px 16px rgba(232, 122, 62, 0.35);
+        }
+
+        .brand-sub {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            letter-spacing: 0.01em;
+            transition: color var(--transition);
+            margin-top: 4px;
+        }
+
+        /* ============================================================
+           LOGIN CARD
+           ============================================================ */
+        .login-card {
+            background: var(--surface);
+            border-radius: var(--card-radius);
+            padding: 44px 40px 40px;
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+            border: 1px solid var(--border);
+            max-width: 440px;
+            margin: 0 auto 30px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: background var(--transition), border var(--transition), box-shadow var(--transition), transform var(--transition);
+            animation: fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--orange), var(--accent), var(--orange-light), var(--orange));
+            background-size: 300% 100%;
+            animation: shimmer 3.5s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 300% 0; }
+            100% { background-position: -300% 0; }
+        }
+
+        .login-card:hover {
+            box-shadow: var(--shadow-lg), 0 0 60px var(--primary-glow);
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-title {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+            color: var(--text);
+            text-align: center;
+            transition: color var(--transition);
+        }
+
+        .login-subtitle {
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 28px;
+            transition: color var(--transition);
+        }
+
+        .form-label {
+            font-family: var(--font-body);
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            letter-spacing: 0.02em;
+            margin-bottom: 8px;
+            transition: color var(--transition);
+        }
+
+        .form-control {
+            font-family: var(--font-body);
+            background: var(--input-bg);
+            border: 1.5px solid var(--border-strong);
+            border-radius: 18px;
+            padding: 16px 20px;
+            font-size: 1.05rem;
+            color: var(--text);
+            transition: all var(--transition-fast);
+            letter-spacing: 0.02em;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+            letter-spacing: 0.05em;
+        }
+
+        .form-control:focus {
+            border-color: var(--orange);
+            box-shadow: 0 0 0 4px rgba(232, 122, 62, 0.15), 0 4px 16px rgba(26, 59, 93, 0.08);
+            background: var(--surface-solid);
+            color: var(--text);
+            outline: none;
+        }
+
+        body.dark .form-control:focus {
+            box-shadow: 0 0 0 4px rgba(240, 148, 88, 0.2), 0 4px 16px rgba(74, 143, 212, 0.1);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 4px;
+            transition: color var(--transition-fast);
+            z-index: 2;
+        }
+
+        .password-toggle:hover {
+            color: var(--orange);
+        }
+
+        body.rtl .password-toggle {
+            right: auto;
+            left: 18px;
+        }
+
+        .btn-login {
+            font-family: var(--font-display);
+            background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 60px;
+            padding: 16px 28px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            letter-spacing: 0.03em;
+            width: 100%;
+            transition: all var(--transition-fast);
+            margin-top: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(232, 122, 62, 0.3);
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(232, 122, 62, 0.4);
+        }
+
+        .btn-login:hover::before {
+            left: 100%;
+        }
+
+        .btn-login:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .error-msg {
+            font-family: var(--font-body);
+            color: #ef4444;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 14px;
+            text-align: center;
+            min-height: 24px;
+            transition: all var(--transition-fast);
+            letter-spacing: 0.01em;
+        }
+
+        .error-msg:not(:empty) {
+            animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+
+        /* ============================================================
+           UTILITIES & RESPONSIVE
+           ============================================================ */
+        .hidden {
+            display: none !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-strong);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--orange);
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 28px 18px;
+            }
+            .brand-company {
+                font-size: 3.2rem;
+                letter-spacing: 0.08em;
+                -webkit-text-stroke: 1.2px rgba(255, 255, 255, 0.5);
+            }
+            .brand-main {
+                font-size: 1.6rem;
+            }
+            .login-card {
+                padding: 36px 28px 32px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .app-container {
+                padding: 20px 14px;
+            }
+            .brand-company {
+                font-size: 2.4rem;
+                letter-spacing: 0.06em;
+                -webkit-text-stroke: 1px rgba(255, 255, 255, 0.45);
+            }
+            .brand-main {
+                font-size: 1.3rem;
+            }
+            .brand-sub {
+                font-size: 0.9rem;
+            }
+            .login-card {
+                padding: 32px 22px 28px;
+                border-radius: 24px;
+            }
+            .login-title {
+                font-size: 1.5rem;
+            }
+            .device-clock {
+                font-size: 1.2rem;
+                padding: 6px 16px;
+            }
+            .device-clock i {
+                font-size: 1rem;
+            }
+            .btn-top {
+                padding: 6px 14px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .clock-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .device-clock {
+                justify-content: center;
+            }
+            .d-flex.gap-2 {
+                justify-content: center;
+            }
+            .brand-company {
+                font-size: 1.9rem;
+                letter-spacing: 0.04em;
+                -webkit-text-stroke: 0.8px rgba(255, 255, 255, 0.4);
+            }
+            .brand-main {
+                font-size: 1.1rem;
+            }
+            .login-card {
+                padding: 28px 18px 24px;
+            }
+        }
+
+        /* ============================================================
+           ARABIC / RTL OVERRIDES
+           ============================================================ */
+        body.rtl {
+            font-family: 'Cairo', 'Inter', sans-serif;
+        }
+
+        body.rtl .brand-company,
+        body.rtl .brand-main,
+        body.rtl .login-title,
+        body.rtl .btn-login,
+        body.rtl .device-clock,
+        body.rtl .btn-top {
+            font-family: 'Cairo', 'Outfit', sans-serif;
+        }
+
+        /* ============================================================
+           ACCESSIBILITY & MOTION
+           ============================================================ */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            body::before,
+            body::after {
+                animation: none;
+            }
+            .login-card::before {
+                animation: none;
+            }
+            .brand-company::after {
+                animation: none;
+            }
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--orange);
+            outline-offset: 3px;
+        }
+    </style>
+</head>
+<body class="no-select">
+
+    <!-- ========== TOP CLOCK BAR ========== -->
+    <div class="top-clock-bar">
+        <div class="container-fluid px-3 px-md-4">
+            <div class="clock-container">
+                <div class="device-clock" id="clockDisplay">
+                    <i class="fas fa-clock"></i>
+                    <span id="clockText">--:--:--</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn-top" id="langToggleBtn" aria-label="Toggle language">
+                        <i class="fas fa-globe"></i>
+                        <span id="langLabel">العربية</span>
+                    </button>
+                    <button class="btn-top" id="themeToggleBtn" aria-label="Toggle theme">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                        <span id="themeLabel">Dark</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MAIN APP ========== -->
+    <div class="app-container">
+
+        <!-- BRAND HEADER: WITH STAND + Wrap & Go! -->
+        <div class="brand-header">
+            <!-- WITH STAND – 3D lightening border + shadow -->
+            <div class="brand-company" id="brandCompany">WITH STAND</div>
+            <!-- Wrap & Go! – Smaller orange -->
+            <h1 class="brand-main" id="brandMain">Wrap &amp; Go!</h1>
+            <p class="brand-sub" id="brandSub">Step-by-step corporate training</p>
+        </div>
+
+        <!-- LOGIN CARD (Password only) -->
+        <div class="login-card" id="loginCard">
+            <h2 class="login-title" id="loginTitle">Sign in</h2>
+            <p class="login-subtitle" id="loginSubtitle">Enter your access key to continue</p>
+
+            <div class="mb-4">
+                <label for="password" class="form-label" id="labelPass">Access Key</label>
+                <div class="password-wrapper">
+                    <input type="password" class="form-control" id="password" placeholder="••••••••" autocomplete="current-password" autofocus>
+                    <button type="button" class="password-toggle" id="passwordToggle" aria-label="Toggle password visibility">
+                        <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn-login" id="loginBtn">
+                <i class="fas fa-arrow-right-to-bracket me-2"></i>
+                <span id="loginBtnText">Login</span>
+            </button>
+            <div class="error-msg" id="errorMsg"></div>
+        </div>
+
+    </div>
+
+    <!-- ========== JAVASCRIPT ========== -->
+    <script>
+        (function() {
+            "use strict";
+
+            // ----- CONFIGURATION -----
+            const VALID_PASSWORD = "wrapandgo";
+            const REDIRECT_PAGE = "guide.html";
+
+            // ----- DOM REFERENCES -----
+            const body = document.body;
+            const clockText = document.getElementById('clockText');
+            const langToggleBtn = document.getElementById('langToggleBtn');
+            const langLabel = document.getElementById('langLabel');
+            const themeToggleBtn = document.getElementById('themeToggleBtn');
+            const themeIcon = document.getElementById('themeIcon');
+            const themeLabel = document.getElementById('themeLabel');
+            const passwordInput = document.getElementById('password');
+            const passwordToggle = document.getElementById('passwordToggle');
+            const passwordToggleIcon = document.getElementById('passwordToggleIcon');
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMsg = document.getElementById('errorMsg');
+
+            const brandCompany = document.getElementById('brandCompany');
+            const brandMain = document.getElementById('brandMain');
+            const brandSub = document.getElementById('brandSub');
+            const loginTitle = document.getElementById('loginTitle');
+            const loginSubtitle = document.getElementById('loginSubtitle');
+            const labelPass = document.getElementById('labelPass');
+            const loginBtnText = document.getElementById('loginBtnText');
+
+            // ----- STATE -----
+            let isArabic = false;
+            let isDark = false;
+
+            // ----- TRANSLATIONS -----
+            const i18n = {
+                en: {
+                    brandCompany: "WITH STAND",
+                    brandMain: "Wrap & Go!",
+                    brandSub: "Step-by-step corporate training",
+                    loginTitle: "Sign in",
+                    loginSubtitle: "Enter your access key to continue",
+                    labelPass: "Access Key",
+                    loginBtn: "Login",
+                    errorInvalid: "Invalid access key. Please try again.",
+                    errorEmpty: "Please enter your access key."
+                },
+                ar: {
+                    brandCompany: "ويث ستاند",
+                    brandMain: "!Wrap & Go",
+                    brandSub: "تدريب الشركات خطوة بخطوة",
+                    loginTitle: "تسجيل الدخول",
+                    loginSubtitle: "أدخل مفتاح الوصول للمتابعة",
+                    labelPass: "مفتاح الوصول",
+                    loginBtn: "دخول",
+                    errorInvalid: "مفتاح الوصول غير صحيح. حاول مرة أخرى.",
+                    errorEmpty: "الرجاء إدخال مفتاح الوصول."
+                }
+            };
+
+            // ----- CLOCK -----
+            function updateClock() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                clockText.textContent = `${hours}:${minutes}:${seconds}`;
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // ----- THEME -----
+            function applyTheme(dark) {
+                isDark = dark;
+                if (dark) {
+                    body.classList.add('dark');
+                    themeIcon.className = 'fas fa-sun';
+                    themeLabel.textContent = isArabic ? 'فاتح' : 'Light';
+                } else {
+                    body.classList.remove('dark');
+                    themeIcon.className = 'fas fa-moon';
+                    themeLabel.textContent = isArabic ? 'داكن' : 'Dark';
+                }
+            }
+
+            themeToggleBtn.addEventListener('click', () => applyTheme(!isDark));
+
+            // ----- LANGUAGE -----
+            function applyLanguage(arabic) {
+                isArabic = arabic;
+                const t = arabic ? i18n.ar : i18n.en;
+                const dir = arabic ? 'rtl' : 'ltr';
+
+                document.documentElement.lang = arabic ? 'ar' : 'en';
+                document.documentElement.dir = dir;
+                body.classList.toggle('rtl', arabic);
+
+                brandCompany.textContent = t.brandCompany;
+                brandMain.textContent = t.brandMain;
+                brandSub.textContent = t.brandSub;
+                loginTitle.textContent = t.loginTitle;
+                loginSubtitle.textContent = t.loginSubtitle;
+                labelPass.textContent = t.labelPass;
+                loginBtnText.textContent = t.loginBtn;
+
+                langLabel.textContent = arabic ? 'English' : 'العربية';
+                passwordInput.placeholder = '••••••••';
+                themeLabel.textContent = isDark ? (arabic ? 'فاتح' : 'Light') : (arabic ? 'داكن' : 'Dark');
+
+                errorMsg.textContent = '';
+            }
+
+            langToggleBtn.addEventListener('click', () => applyLanguage(!isArabic));
+
+            // ----- PASSWORD VISIBILITY TOGGLE -----
+            passwordToggle.addEventListener('click', () => {
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+                passwordToggleIcon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+            });
+
+            // ----- LOGIN & REDIRECT -----
+            function performLogin() {
+                const pass = passwordInput.value.trim();
+                const t = isArabic ? i18n.ar : i18n.en;
+
+                if (!pass) {
+                    errorMsg.textContent = t.errorEmpty;
+                    return;
+                }
+
+                if (pass === VALID_PASSWORD) {
+                    errorMsg.textContent = '';
+                    loginBtnText.textContent = isArabic ? 'جارٍ الدخول...' : 'Redirecting...';
+                    loginBtn.style.opacity = '0.8';
+                    loginBtn.style.pointerEvents = 'none';
+                    setTimeout(() => {
+                        window.location.href = REDIRECT_PAGE;
+                    }, 600);
+                } else {
+                    errorMsg.textContent = t.errorInvalid;
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            }
+
+            loginBtn.addEventListener('click', performLogin);
+
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performLogin();
+                }
+            });
+
+            // ----- DISABLE RIGHT CLICK / VIEW SOURCE / DEVTOOLS -----
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                return false;
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (
+                    (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key)) ||
+                    (e.ctrlKey && ['U','u'].includes(e.key)) ||
+                    e.key === 'F12'
+                ) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            document.querySelectorAll('img').forEach(img => {
+                img.addEventListener('dragstart', (e) => e.preventDefault());
+            });
+
+            // ----- PWA SETUP -----
+            const manifest = {
+                name: "Wrap & Go! - With Stand",
+                short_name: "Wrap & Go!",
+                start_url: ".",
+                display: "standalone",
+                background_color: "#1a3b5d",
+                theme_color: "#e87a3e",
+                icons: [
+                    {
+                        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23e87a3e'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='Outfit,sans-serif' font-weight='700'%3EW%3C/text%3E%3C/svg%3E",
+                        sizes: "192x192",
+                        type: "image/svg+xml"
+                    }
+                ]
+            };
+
+            const manifestLink = document.createElement('link');
+            manifestLink.rel = 'manifest';
+            manifestLink.href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest));
+            document.head.appendChild(manifestLink);
+
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    self.addEventListener('install', (e) => { e.waitUntil(self.skipWaiting()); });
+                    self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+                    self.addEventListener('fetch', (e) => {
+                        e.respondWith(fetch(e.request).catch(() => new Response('Offline')));
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).catch(() => {});
+            }
+
+            const metaTheme = document.createElement('meta');
+            metaTheme.name = 'theme-color';
+            metaTheme.content = '#e87a3e';
+            document.head.appendChild(metaTheme);
+
+            const appleMeta = document.createElement('meta');
+            appleMeta.name = 'apple-mobile-web-app-capable';
+            appleMeta.content = 'yes';
+            document.head.appendChild(appleMeta);
+
+            const appleStatus = document.createElement('meta');
+            appleStatus.name = 'apple-mobile-web-app-status-bar-style';
+            appleStatus.content = 'black-translucent';
+            document.head.appendChild(appleStatus);
+
+            // ----- INIT -----
+            applyTheme(false);
+            applyLanguage(false);
+            passwordInput.focus();
+
+        })();
+    </script>
+</body>
+</html>
