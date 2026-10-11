@@ -519,7 +519,7 @@
 
     .slide-dot:hover:not(.active) { background: rgba(255, 255, 255, 0.6); }
 
-    /* ========== ABOUT DEV FLOATING BUTTON (BOTTOM RIGHT) ========== */
+    /* ========== ABOUT DEV FLOATING BUTTON ========== */
     .about-dev-fab {
       position: fixed;
       bottom: 1.75rem;
@@ -724,7 +724,7 @@
 
     [dir="rtl"] .mobile-sub { padding-left: 0; padding-right: 1rem; }
 
-    .mobile-nav-item.open > .mobile-sub { max-height: 400px; }
+    .mobile-nav-item.open > .mobile-sub { max-height: 500px; }
 
     .mobile-sub-link {
       display: flex;
@@ -860,6 +860,14 @@
                     <span class="dd-desc" data-i18n="menu1Item1Desc">Track your sales</span>
                   </span>
                 </a>
+                <!-- ========== NEW: SALES BY TENDER ========== -->
+                <a href="https://ghostkmr.github.io/withstand/salesbytender.html" class="dropdown-link">
+                  <i class="fas fa-receipt dd-icon"></i>
+                  <span class="dd-text">
+                    <span class="dd-title" data-i18n="menu1Item3">Sales by Tender</span>
+                    <span class="dd-desc" data-i18n="menu1Item3Desc">Tender-wise breakdown</span>
+                  </span>
+                </a>
                 <a href="#" class="dropdown-link">
                   <i class="fas fa-cubes dd-icon"></i>
                   <span class="dd-text">
@@ -917,7 +925,7 @@
 
   </div>
 
-  <!-- ========== ABOUT DEVELOPER FLOATING BUTTON (BOTTOM RIGHT) ========== -->
+  <!-- ========== ABOUT DEVELOPER FLOATING BUTTON ========== -->
   <a href="https://ghostkmr.github.io/withstand/dev.html"
      class="about-dev-fab"
      title="About Developer"
@@ -959,6 +967,8 @@
         </button>
         <div class="mobile-sub">
           <a href="https://ghostkmr.github.io/withstand/salestracker.html" class="mobile-sub-link"><i class="fas fa-chart-bar"></i> <span data-i18n="menu1Item1">Sales Tracker</span></a>
+          <!-- ========== NEW: SALES BY TENDER (mobile) ========== -->
+          <a href="https://ghostkmr.github.io/withstand/salesbytender.html" class="mobile-sub-link"><i class="fas fa-receipt"></i> <span data-i18n="menu1Item3">Sales by Tender</span></a>
           <a href="#" class="mobile-sub-link"><i class="fas fa-cubes"></i> <span data-i18n="menu1Item2">Inventory Tracker</span> <span class="soon-badge" data-i18n="soon">Soon</span></a>
         </div>
       </div>
@@ -994,6 +1004,8 @@
           menu1Item1Desc: "Track your sales",
           menu1Item2: "Inventory Tracker",
           menu1Item2Desc: "Coming soon",
+          menu1Item3: "Sales by Tender",
+          menu1Item3Desc: "Tender-wise breakdown",
           heroWithstand: "Withstand",
           heroTitle1: "Building the future of",
           heroTitle2: "Qatar's enterprises",
@@ -1010,6 +1022,8 @@
           menu1Item1Desc: "تتبع مبيعاتك",
           menu1Item2: "متتبع المخزون",
           menu1Item2Desc: "قريباً",
+          menu1Item3: "المبيعات حسب طريقة الدفع",
+          menu1Item3Desc: "التفصيل حسب طريقة الدفع",
           heroWithstand: "ويذستاند",
           heroTitle1: "نبني مستقبل",
           heroTitle2: "المؤسسات القطرية",
@@ -1026,6 +1040,8 @@
           menu1Item1Desc: "अपनी बिक्री ट्रैक करें",
           menu1Item2: "इन्वेंटरी ट्रैकर",
           menu1Item2Desc: "जल्द आ रहा है",
+          menu1Item3: "टेंडर द्वारा बिक्री",
+          menu1Item3Desc: "टेंडर-वार विवरण",
           heroWithstand: "विदस्टैंड",
           heroTitle1: "भविष्य का निर्माण",
           heroTitle2: "कतर के उद्यमों",
