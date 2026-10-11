@@ -123,6 +123,7 @@
       filter: brightness(0.85) saturate(1.4);
     }
 
+    /* Fire overlay is now static — no animation, saves mobile GPU */
     .video-bg::after {
       content: '';
       position: absolute;
@@ -131,12 +132,7 @@
         radial-gradient(circle at 20% 40%, rgba(255, 120, 40, 0.15) 0%, transparent 50%),
         radial-gradient(circle at 80% 70%, rgba(180, 90, 30, 0.13) 0%, transparent 50%),
         radial-gradient(circle at 50% 90%, rgba(120, 60, 20, 0.15) 0%, transparent 60%);
-      animation: swirlFire 14s infinite alternate ease-in-out;
       pointer-events: none;
-    }
-    @keyframes swirlFire {
-      0%   { transform: scale(1) rotate(0deg);   opacity: 0.55; }
-      100% { transform: scale(1.25) rotate(4deg); opacity: 0.9;  }
     }
 
     /* ============================================================
@@ -161,6 +157,9 @@
       padding: 3rem 1rem 6rem;
       display: flex;
       justify-content: center;
+      /* Promote to its own GPU layer for smooth scrolling */
+      will-change: transform;
+      transform: translateZ(0);
     }
 
     .credits-viewport.active .credits-roll {
@@ -168,8 +167,8 @@
     }
 
     @keyframes rollUp {
-      0%   { transform: translateY(0); }
-      100% { transform: translateY(calc(-100% - 100vh)); }
+      0%   { transform: translateY(0) translateZ(0); }
+      100% { transform: translateY(calc(-100% - 100vh)) translateZ(0); }
     }
 
     .credits-viewport:hover .credits-roll {
@@ -185,34 +184,11 @@
       text-align: center;
     }
 
+    /* Text: solid warm color, single subtle shadow — no animation */
     .credits-content,
     .credits-content * {
-      color: #fff0d5;
-      text-shadow:
-        0 0 5px rgba(255, 140, 40, 1),
-        0 0 14px rgba(255, 90, 20, 0.9),
-        0 0 28px rgba(200, 60, 10, 0.65),
-        0 0 40px rgba(120, 40, 10, 0.5),
-        1px 1px 2px rgba(30, 10, 0, 0.95);
-      animation: fireFlicker 3s infinite alternate ease-in-out;
-    }
-    @keyframes fireFlicker {
-      0%, 100% {
-        text-shadow:
-          0 0 5px rgba(255, 140, 40, 1),
-          0 0 14px rgba(255, 90, 20, 0.9),
-          0 0 28px rgba(200, 60, 10, 0.65),
-          0 0 40px rgba(120, 40, 10, 0.5),
-          1px 1px 2px rgba(30, 10, 0, 0.95);
-      }
-      50% {
-        text-shadow:
-          0 0 7px rgba(255, 180, 70, 1),
-          0 0 20px rgba(255, 110, 30, 1),
-          0 0 36px rgba(220, 80, 15, 0.85),
-          0 0 50px rgba(150, 50, 15, 0.6),
-          1px 1px 2px rgba(30, 10, 0, 0.95);
-      }
+      color: #ffe8c8;
+      text-shadow: 0 1px 6px rgba(120, 40, 10, 0.85);
     }
 
     .name {
@@ -225,8 +201,8 @@
       background-clip: text;
       margin-bottom: 0.5rem;
       line-height: 1.2;
-      filter: drop-shadow(0 0 20px rgba(255, 100, 20, 1))
-              drop-shadow(0 0 40px rgba(255, 60, 10, 0.6));
+      /* Single static drop-shadow, no animation */
+      filter: drop-shadow(0 2px 12px rgba(255, 80, 10, 0.6));
     }
     .tagline {
       font-size: 1.2rem;
@@ -284,18 +260,19 @@
       margin: 0.8rem 0 1rem;
     }
     .skill-tag {
-      background: rgba(60, 25, 8, 0.4);
+      background: rgba(60, 25, 8, 0.55);
       border-radius: 40px;
       padding: 0.4rem 1.1rem;
       font-size: 0.85rem;
       font-weight: 500;
       color: #ffe2b8;
-      box-shadow: 0 0 14px rgba(255, 100, 20, 0.35);
+      /* static shadow, no animation */
+      box-shadow: 0 0 10px rgba(255, 100, 20, 0.3);
     }
 
     .badge {
       display: inline-block;
-      background: rgba(255, 120, 30, 0.2);
+      background: rgba(255, 120, 30, 0.25);
       border-radius: 6px;
       padding: 0.25rem 0.8rem;
       font-size: 0.85rem;
@@ -319,7 +296,6 @@
     .cert-item::before {
       content: '✦  ';
       color: #ff8c00;
-      text-shadow: 0 0 8px rgba(255, 140, 40, 1);
     }
 
     .edu-line {
@@ -399,7 +375,6 @@
         <!-- EXPERIENCE -->
         <div class="section-title">Experience</div>
 
-        <!-- NEW CURRENT ROLE -->
         <div class="job">
           <div class="job-header">
             <span class="job-title">Restaurant Manager</span>
