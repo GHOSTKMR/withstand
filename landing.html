@@ -6,7 +6,7 @@
   <title>Withstand | Building Qatar's Future</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     /* ---------- CSS Variables ---------- */
@@ -80,6 +80,11 @@
     [dir="rtl"] body,
     [dir="rtl"] {
       font-family: 'Noto Kufi Arabic', 'Inter', sans-serif;
+    }
+
+    [lang="hi"] body,
+    [lang="hi"] {
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
     }
 
     /* ========== BACKGROUND SLIDESHOW ========== */
@@ -284,7 +289,7 @@
       position: absolute;
       top: calc(100% + 8px);
       left: 0;
-      min-width: 260px;
+      min-width: 280px;
       background: var(--bg-card-solid);
       border: 1px solid var(--border-light);
       border-radius: 16px;
@@ -316,7 +321,7 @@
       text-decoration: none;
       border-radius: 10px;
       transition: background 0.2s, color 0.2s, padding-left 0.2s;
-      cursor: default;
+      cursor: pointer;
     }
 
     [dir="rtl"] .dropdown-link { padding-left: 0.9rem; }
@@ -375,13 +380,14 @@
       flex-shrink: 0;
     }
 
-    /* Language Toggle */
+    /* Language Toggle — now with three options */
     .lang-switch {
       display: flex;
       background: var(--toggle-bg);
       border-radius: 40px;
       padding: 3px;
       border: 1px solid var(--border-light);
+      gap: 2px;
     }
 
     .lang-opt {
@@ -396,6 +402,7 @@
       transition: all 0.2s ease;
       font-family: inherit;
       letter-spacing: 0.02em;
+      white-space: nowrap;
     }
 
     .lang-opt.active {
@@ -647,7 +654,7 @@
       text-decoration: none;
       border-radius: 10px;
       transition: background 0.2s, color 0.2s;
-      cursor: default;
+      cursor: pointer;
     }
 
     .mobile-sub-link:hover {
@@ -663,6 +670,7 @@
       margin-top: 2rem;
       padding-top: 1.5rem;
       border-top: 1px solid var(--border-light);
+      flex-wrap: wrap;
     }
 
     /* ========== RESPONSIVE ========== */
@@ -673,20 +681,39 @@
 
     @media (max-width: 640px) {
       .container { padding: 0 1.25rem; }
-      .header-inner { height: 68px; }
+      .header-inner { height: 68px; gap: 0.75rem; }
       .brand-emblem { width: 38px; height: 38px; font-size: 1.1rem; }
       .brand-name { font-size: 1.05rem; }
       .brand-tagline { font-size: 0.55rem; }
-      .hero { min-height: auto; padding: 4rem 0 5rem; }
-      .lang-opt { padding: 0.4rem 0.7rem; font-size: 0.72rem; }
+      .hero { min-height: auto; padding: 3.5rem 0 4.5rem; }
+      .hero h1 { font-size: clamp(2rem, 7vw, 3.5rem); }
+      .lang-opt { padding: 0.35rem 0.6rem; font-size: 0.7rem; }
       .theme-switch { width: 46px; height: 27px; }
       .theme-knob { width: 21px; height: 21px; }
       [data-theme="dark"] .theme-knob { transform: translateX(19px); }
       .slide-indicators { bottom: 1.5rem; }
+      .header-actions { gap: 0.5rem; }
+      .dropdown { min-width: 240px; }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 0 1rem; }
+      .brand-emblem { width: 34px; height: 34px; font-size: 1rem; }
+      .brand-name { font-size: 0.95rem; }
+      .brand-tagline { font-size: 0.5rem; }
+      .lang-opt { padding: 0.3rem 0.5rem; font-size: 0.65rem; }
+      .theme-switch { width: 42px; height: 25px; }
+      .theme-knob { width: 19px; height: 19px; }
+      [data-theme="dark"] .theme-knob { transform: translateX(17px); }
+      .mobile-menu { padding: 1.25rem; }
+      .hero h1 { font-size: clamp(1.8rem, 8vw, 2.8rem); }
+      .hero h1 .withstand-word { font-size: 0.45em; letter-spacing: 0.25em; }
     }
 
     @media (max-width: 380px) {
-      .hero h1 { font-size: 1.9rem; }
+      .hero h1 { font-size: 1.7rem; }
+      .header-inner { height: 62px; }
+      .lang-opt { padding: 0.25rem 0.4rem; font-size: 0.6rem; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -697,7 +724,7 @@
 </head>
 <body>
 
-  <!-- ========== BACKGROUND SLIDESHOW (5 slides — 13.webp removed) ========== -->
+  <!-- ========== BACKGROUND SLIDESHOW (5 slides) ========== -->
   <div class="bg-slideshow" aria-hidden="true">
     <div class="bg-slide active" style="background-image: url('https://ghostkmr.github.io/withstand/11.webp');"></div>
     <div class="bg-slide" style="background-image: url('https://ghostkmr.github.io/withstand/12.webp');"></div>
@@ -711,7 +738,7 @@
     <!-- ========== HEADER ========== -->
     <header class="site-header" id="siteHeader">
       <div class="container header-inner">
-        <!-- Brand: Withstand in grey -->
+        <!-- Brand -->
         <a href="#" class="brand">
           <div class="brand-emblem"><i class="fas fa-shield-halved"></i></div>
           <div class="brand-text">
@@ -720,7 +747,7 @@
           </div>
         </a>
 
-        <!-- Desktop Nav — Home + 3 dropdown menus -->
+        <!-- Desktop Nav — Home + In-Store Trackers dropdown only -->
         <nav class="main-nav" aria-label="Main navigation">
           <ul class="nav-list">
             <li class="nav-item">
@@ -729,73 +756,22 @@
 
             <li class="nav-item" data-dropdown>
               <button class="nav-link" aria-expanded="false">
-                <span data-i18n="navMenu1">Solutions</span>
+                <span data-i18n="navMenu1">In-Store Trackers</span>
                 <i class="fas fa-chevron-down chevron"></i>
               </button>
               <div class="dropdown">
-                <a href="https://ghostkmr.github.io/withstand/aggrigators.html" class="dropdown-link">
-                  <i class="fas fa-cube dd-icon"></i>
+                <a href="https://ghostkmr.github.io/withstand/sales-tracker.html" class="dropdown-link">
+                  <i class="fas fa-chart-bar dd-icon"></i>
                   <span class="dd-text">
-                    <span class="dd-title" data-i18n="menu1Item1">Aggrigators With Wrap&Go!</span>
-                    <span class="dd-desc" data-i18n="menu1Item1Desc">Coming soon</span>
+                    <span class="dd-title" data-i18n="menu1Item1">Sales Tracker</span>
+                    <span class="dd-desc" data-i18n="menu1Item1Desc">Track your sales</span>
                   </span>
-                  <span class="soon-badge" data-i18n="soon">Soon</span>
                 </a>
                 <a href="#" class="dropdown-link">
                   <i class="fas fa-cubes dd-icon"></i>
                   <span class="dd-text">
-                    <span class="dd-title" data-i18n="menu1Item2">Sub Item Two</span>
+                    <span class="dd-title" data-i18n="menu1Item2">Inventory Tracker</span>
                     <span class="dd-desc" data-i18n="menu1Item2Desc">Coming soon</span>
-                  </span>
-                  <span class="soon-badge" data-i18n="soon">Soon</span>
-                </a>
-              </div>
-            </li>
-
-            <li class="nav-item" data-dropdown>
-              <button class="nav-link" aria-expanded="false">
-                <span data-i18n="navMenu2">Company</span>
-                <i class="fas fa-chevron-down chevron"></i>
-              </button>
-              <div class="dropdown">
-                <a href="#" class="dropdown-link">
-                  <i class="fas fa-building dd-icon"></i>
-                  <span class="dd-text">
-                    <span class="dd-title" data-i18n="menu2Item1">Sub Item One</span>
-                    <span class="dd-desc" data-i18n="menu2Item1Desc">Coming soon</span>
-                  </span>
-                  <span class="soon-badge" data-i18n="soon">Soon</span>
-                </a>
-                <a href="#" class="dropdown-link">
-                  <i class="fas fa-users dd-icon"></i>
-                  <span class="dd-text">
-                    <span class="dd-title" data-i18n="menu2Item2">Sub Item Two</span>
-                    <span class="dd-desc" data-i18n="menu2Item2Desc">Coming soon</span>
-                  </span>
-                  <span class="soon-badge" data-i18n="soon">Soon</span>
-                </a>
-              </div>
-            </li>
-
-            <li class="nav-item" data-dropdown>
-              <button class="nav-link" aria-expanded="false">
-                <span data-i18n="navMenu3">Insights</span>
-                <i class="fas fa-chevron-down chevron"></i>
-              </button>
-              <div class="dropdown">
-                <a href="#" class="dropdown-link">
-                  <i class="fas fa-chart-line dd-icon"></i>
-                  <span class="dd-text">
-                    <span class="dd-title" data-i18n="menu3Item1">Sub Item One</span>
-                    <span class="dd-desc" data-i18n="menu3Item1Desc">Coming soon</span>
-                  </span>
-                  <span class="soon-badge" data-i18n="soon">Soon</span>
-                </a>
-                <a href="#" class="dropdown-link">
-                  <i class="fas fa-newspaper dd-icon"></i>
-                  <span class="dd-text">
-                    <span class="dd-title" data-i18n="menu3Item2">Sub Item Two</span>
-                    <span class="dd-desc" data-i18n="menu3Item2Desc">Coming soon</span>
                   </span>
                   <span class="soon-badge" data-i18n="soon">Soon</span>
                 </a>
@@ -809,6 +785,7 @@
           <div class="lang-switch" role="group" aria-label="Language selector">
             <button class="lang-opt active" id="langEn" aria-pressed="true">EN</button>
             <button class="lang-opt" id="langAr" aria-pressed="false">عربي</button>
+            <button class="lang-opt" id="langHi" aria-pressed="false">हिं</button>
           </div>
 
           <button class="theme-switch" id="themeToggle" role="switch" aria-checked="false" aria-label="Toggle dark mode">
@@ -872,34 +849,12 @@
 
       <div class="mobile-nav-item" data-mobile-dropdown>
         <button class="mobile-nav-link">
-          <span data-i18n="navMenu1">Solutions</span>
+          <span data-i18n="navMenu1">In-Store Trackers</span>
           <i class="fas fa-chevron-down chevron"></i>
         </button>
         <div class="mobile-sub">
-          <a href="#" class="mobile-sub-link"><i class="fas fa-cube"></i> <span data-i18n="menu1Item1">Sub Item One</span> <span class="soon-badge" data-i18n="soon">Soon</span></a>
-          <a href="#" class="mobile-sub-link"><i class="fas fa-cubes"></i> <span data-i18n="menu1Item2">Sub Item Two</span> <span class="soon-badge" data-i18n="soon">Soon</span></a>
-        </div>
-      </div>
-
-      <div class="mobile-nav-item" data-mobile-dropdown>
-        <button class="mobile-nav-link">
-          <span data-i18n="navMenu2">Company</span>
-          <i class="fas fa-chevron-down chevron"></i>
-        </button>
-        <div class="mobile-sub">
-          <a href="#" class="mobile-sub-link"><i class="fas fa-building"></i> <span data-i18n="menu2Item1">Sub Item One</span> <span class="soon-badge" data-i18n="soon">Soon</span></a>
-          <a href="#" class="mobile-sub-link"><i class="fas fa-users"></i> <span data-i18n="menu2Item2">Sub Item Two</span> <span class="soon-badge" data-i18n="soon">Soon</span></a>
-        </div>
-      </div>
-
-      <div class="mobile-nav-item" data-mobile-dropdown>
-        <button class="mobile-nav-link">
-          <span data-i18n="navMenu3">Insights</span>
-          <i class="fas fa-chevron-down chevron"></i>
-        </button>
-        <div class="mobile-sub">
-          <a href="#" class="mobile-sub-link"><i class="fas fa-chart-line"></i> <span data-i18n="menu3Item1">Sub Item One</span> <span class="soon-badge" data-i18n="soon">Soon</span></a>
-          <a href="#" class="mobile-sub-link"><i class="fas fa-newspaper"></i> <span data-i18n="menu3Item2">Sub Item Two</span> <span class="soon-badge" data-i18n="soon">Soon</span></a>
+          <a href="https://ghostkmr.github.io/withstand/sales-tracker.html" class="mobile-sub-link"><i class="fas fa-chart-bar"></i> <span data-i18n="menu1Item1">Sales Tracker</span></a>
+          <a href="#" class="mobile-sub-link"><i class="fas fa-cubes"></i> <span data-i18n="menu1Item2">Inventory Tracker</span> <span class="soon-badge" data-i18n="soon">Soon</span></a>
         </div>
       </div>
     </nav>
@@ -908,6 +863,7 @@
       <div class="lang-switch" role="group" aria-label="Language selector">
         <button class="lang-opt active" id="langEnMobile" aria-pressed="true">EN</button>
         <button class="lang-opt" id="langArMobile" aria-pressed="false">عربي</button>
+        <button class="lang-opt" id="langHiMobile" aria-pressed="false">हिं</button>
       </div>
       <button class="theme-switch" id="themeToggleMobile" role="switch" aria-checked="false" aria-label="Toggle dark mode">
         <i class="fas fa-sun"></i>
@@ -927,22 +883,12 @@
           brandName: "Withstand",
           brandTagline: "Building Qatar's Future",
           navHome: "Home",
-          navMenu1: "Solutions",
-          navMenu2: "Company",
-          navMenu3: "Insights",
+          navMenu1: "In-Store Trackers",
           soon: "Soon",
-          menu1Item1: "Sub Item One",
-          menu1Item1Desc: "Coming soon",
-          menu1Item2: "Sub Item Two",
+          menu1Item1: "Sales Tracker",
+          menu1Item1Desc: "Track your sales",
+          menu1Item2: "Inventory Tracker",
           menu1Item2Desc: "Coming soon",
-          menu2Item1: "Sub Item One",
-          menu2Item1Desc: "Coming soon",
-          menu2Item2: "Sub Item Two",
-          menu2Item2Desc: "Coming soon",
-          menu3Item1: "Sub Item One",
-          menu3Item1Desc: "Coming soon",
-          menu3Item2: "Sub Item Two",
-          menu3Item2Desc: "Coming soon",
           heroWithstand: "Withstand",
           heroTitle1: "Building the future of",
           heroTitle2: "Qatar's enterprises"
@@ -951,25 +897,29 @@
           brandName: "ويذستاند",
           brandTagline: "نبني مستقبل قطر",
           navHome: "الرئيسية",
-          navMenu1: "الحلول",
-          navMenu2: "الشركة",
-          navMenu3: "رؤى",
+          navMenu1: "متتبعات المتجر",
           soon: "قريباً",
-          menu1Item1: "العنصر الأول",
-          menu1Item1Desc: "قريباً",
-          menu1Item2: "العنصر الثاني",
+          menu1Item1: "متتبع المبيعات",
+          menu1Item1Desc: "تتبع مبيعاتك",
+          menu1Item2: "متتبع المخزون",
           menu1Item2Desc: "قريباً",
-          menu2Item1: "العنصر الأول",
-          menu2Item1Desc: "قريباً",
-          menu2Item2: "العنصر الثاني",
-          menu2Item2Desc: "قريباً",
-          menu3Item1: "العنصر الأول",
-          menu3Item1Desc: "قريباً",
-          menu3Item2: "العنصر الثاني",
-          menu3Item2Desc: "قريباً",
           heroWithstand: "ويذستاند",
           heroTitle1: "نبني مستقبل",
           heroTitle2: "المؤسسات القطرية"
+        },
+        hi: {
+          brandName: "विदस्टैंड",
+          brandTagline: "कतर का भविष्य निर्माण",
+          navHome: "होम",
+          navMenu1: "इन-स्टोर ट्रैकर",
+          soon: "जल्द",
+          menu1Item1: "बिक्री ट्रैकर",
+          menu1Item1Desc: "अपनी बिक्री ट्रैक करें",
+          menu1Item2: "इन्वेंटरी ट्रैकर",
+          menu1Item2Desc: "जल्द आ रहा है",
+          heroWithstand: "विदस्टैंड",
+          heroTitle1: "भविष्य का निर्माण",
+          heroTitle2: "कतर के उद्यमों"
         }
       };
 
@@ -980,7 +930,7 @@
       try {
         const sl = localStorage.getItem('ws-lang');
         const st = localStorage.getItem('ws-theme');
-        if (sl === 'ar' || sl === 'en') currentLang = sl;
+        if (sl === 'ar' || sl === 'en' || sl === 'hi') currentLang = sl;
         if (st === 'dark' || st === 'light') currentTheme = st;
       } catch (e) {}
 
@@ -988,8 +938,10 @@
       const htmlRoot = document.getElementById('htmlRoot');
       const langEn = document.getElementById('langEn');
       const langAr = document.getElementById('langAr');
+      const langHi = document.getElementById('langHi');
       const langEnMobile = document.getElementById('langEnMobile');
       const langArMobile = document.getElementById('langArMobile');
+      const langHiMobile = document.getElementById('langHiMobile');
       const themeToggle = document.getElementById('themeToggle');
       const themeToggleMobile = document.getElementById('themeToggleMobile');
       const i18nElements = document.querySelectorAll('[data-i18n]');
@@ -997,21 +949,37 @@
 
       /* ================= LANGUAGE ================= */
       function updateLanguage() {
-        htmlRoot.lang = currentLang === 'ar' ? 'ar' : 'en';
-        htmlRoot.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+        // Set lang and dir
+        if (currentLang === 'ar') {
+          htmlRoot.lang = 'ar';
+          htmlRoot.dir = 'rtl';
+        } else if (currentLang === 'hi') {
+          htmlRoot.lang = 'hi';
+          htmlRoot.dir = 'ltr';
+        } else {
+          htmlRoot.lang = 'en';
+          htmlRoot.dir = 'ltr';
+        }
 
+        // Desktop buttons
         langEn.classList.toggle('active', currentLang === 'en');
         langAr.classList.toggle('active', currentLang === 'ar');
+        langHi.classList.toggle('active', currentLang === 'hi');
         langEn.setAttribute('aria-pressed', currentLang === 'en');
         langAr.setAttribute('aria-pressed', currentLang === 'ar');
+        langHi.setAttribute('aria-pressed', currentLang === 'hi');
 
+        // Mobile buttons
         if (langEnMobile) {
           langEnMobile.classList.toggle('active', currentLang === 'en');
           langArMobile.classList.toggle('active', currentLang === 'ar');
+          langHiMobile.classList.toggle('active', currentLang === 'hi');
           langEnMobile.setAttribute('aria-pressed', currentLang === 'en');
           langArMobile.setAttribute('aria-pressed', currentLang === 'ar');
+          langHiMobile.setAttribute('aria-pressed', currentLang === 'hi');
         }
 
+        // Translate all i18n elements
         i18nElements.forEach(el => {
           const key = el.getAttribute('data-i18n');
           if (translations[currentLang] && translations[currentLang][key] !== undefined) {
@@ -1026,7 +994,9 @@
       function updateAriaLabels() {
         const themeLabel = currentLang === 'ar'
           ? (currentTheme === 'dark' ? 'التبديل إلى الوضع الفاتح' : 'التبديل إلى الوضع الداكن')
-          : (currentTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+          : currentLang === 'hi'
+            ? (currentTheme === 'dark' ? 'लाइट मोड पर स्विच करें' : 'डार्क मोड पर स्विच करें')
+            : (currentTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
         themeToggle.setAttribute('aria-label', themeLabel);
         if (themeToggleMobile) themeToggleMobile.setAttribute('aria-label', themeLabel);
       }
@@ -1054,8 +1024,10 @@
       /* ================= EVENT LISTENERS ================= */
       langEn.addEventListener('click', () => { if (currentLang !== 'en') { currentLang = 'en'; updateLanguage(); } });
       langAr.addEventListener('click', () => { if (currentLang !== 'ar') { currentLang = 'ar'; updateLanguage(); } });
+      langHi.addEventListener('click', () => { if (currentLang !== 'hi') { currentLang = 'hi'; updateLanguage(); } });
       if (langEnMobile) langEnMobile.addEventListener('click', () => { if (currentLang !== 'en') { currentLang = 'en'; updateLanguage(); } });
       if (langArMobile) langArMobile.addEventListener('click', () => { if (currentLang !== 'ar') { currentLang = 'ar'; updateLanguage(); } });
+      if (langHiMobile) langHiMobile.addEventListener('click', () => { if (currentLang !== 'hi') { currentLang = 'hi'; updateLanguage(); } });
 
       themeToggle.addEventListener('click', toggleTheme);
       themeToggle.addEventListener('keydown', (e) => {
@@ -1226,7 +1198,6 @@
       /* ================= INIT ================= */
       updateTheme();
       updateLanguage();
-      if (currentLang === 'ar') updateLanguage();
 
     })();
   </script>
