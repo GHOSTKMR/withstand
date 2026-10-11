@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mueen Ul Islam · Animated CV</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+      background: #000;
+      color: #ffe0b0;
+    }
+
+    /* ============================================================
+       START SCREEN
+       ============================================================ */
+    .start-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      cursor: pointer;
+      transition: opacity 1s ease, visibility 1s ease;
+    }
+    .start-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .play-button {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffb347, #ff6b1a 60%, #8b2500);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 40px rgba(255, 120, 30, 0.8),
+        0 0 80px rgba(255, 80, 10, 0.5),
+        inset 0 0 30px rgba(255, 200, 100, 0.4);
+      animation: playPulse 2s infinite ease-in-out;
+      transition: transform 0.3s ease;
+    }
+    .play-button:hover { transform: scale(1.08); }
+    .play-button svg {
+      width: 60px;
+      height: 60px;
+      fill: #1a0600;
+      margin-left: 8px;
+      filter: drop-shadow(0 0 10px rgba(255, 200, 100, 0.8));
+    }
+    @keyframes playPulse {
+      0%   { box-shadow: 0 0 40px rgba(255, 120, 30, 0.8),
+                         0 0 80px rgba(255, 80, 10, 0.5),
+                         inset 0 0 30px rgba(255, 200, 100, 0.4);
+             transform: scale(1); }
+      50%  { box-shadow: 0 0 60px rgba(255, 140, 40, 1),
+                         0 0 120px rgba(255, 90, 20, 0.7),
+                         inset 0 0 40px rgba(255, 220, 120, 0.6);
+             transform: scale(1.04); }
+      100% { box-shadow: 0 0 40px rgba(255, 120, 30, 0.8),
+                         0 0 80px rgba(255, 80, 10, 0.5),
+                         inset 0 0 30px rgba(255, 200, 100, 0.4);
+             transform: scale(1); }
+    }
+
+    .start-label {
+      font-size: 1.1rem;
+      letter-spacing: 6px;
+      font-weight: 500;
+      color: #ffb878;
+      text-shadow:
+        0 0 10px rgba(255, 140, 40, 1),
+        0 0 24px rgba(255, 90, 20, 0.8);
+      animation: labelFade 2s infinite ease-in-out;
+    }
+    @keyframes labelFade {
+      0%, 100% { opacity: 0.6; }
+      50%      { opacity: 1;   }
+    }
+
+    /* ============================================================
+       FULLSCREEN VIDEO BACKGROUND
+       ============================================================ */
+    .video-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      min-width: 100%;
+      min-height: 100%;
+      z-index: -2;
+      overflow: hidden;
+      background: #0b0705;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+    }
+    .video-bg.active { opacity: 1; }
+
+    .video-bg video {
+      position: absolute;
+      top: 50%; left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      transform: translate(-50%, -50%);
+      object-fit: cover;
+      filter: brightness(0.85) saturate(1.4);
+    }
+
+    .video-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 40%, rgba(255, 120, 40, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(180, 90, 30, 0.13) 0%, transparent 50%),
+        radial-gradient(circle at 50% 90%, rgba(120, 60, 20, 0.15) 0%, transparent 60%);
+      animation: swirlFire 14s infinite alternate ease-in-out;
+      pointer-events: none;
+    }
+    @keyframes swirlFire {
+      0%   { transform: scale(1) rotate(0deg);   opacity: 0.55; }
+      100% { transform: scale(1.25) rotate(4deg); opacity: 0.9;  }
+    }
+
+    /* ============================================================
+       CREDITS VIEWPORT
+       ============================================================ */
+    .credits-viewport {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+      pointer-events: none;
+    }
+    .credits-viewport.active { opacity: 1; }
+
+    .credits-roll {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100vh;
+      padding: 3rem 1rem 6rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .credits-viewport.active .credits-roll {
+      animation: rollUp var(--roll-duration, 90s) linear forwards;
+    }
+
+    @keyframes rollUp {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(calc(-100% - 100vh)); }
+    }
+
+    .credits-viewport:hover .credits-roll {
+      animation-play-state: paused;
+    }
+
+    /* ============================================================
+       INNER CONTENT
+       ============================================================ */
+    .credits-content {
+      max-width: 900px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .credits-content,
+    .credits-content * {
+      color: #fff0d5;
+      text-shadow:
+        0 0 5px rgba(255, 140, 40, 1),
+        0 0 14px rgba(255, 90, 20, 0.9),
+        0 0 28px rgba(200, 60, 10, 0.65),
+        0 0 40px rgba(120, 40, 10, 0.5),
+        1px 1px 2px rgba(30, 10, 0, 0.95);
+      animation: fireFlicker 3s infinite alternate ease-in-out;
+    }
+    @keyframes fireFlicker {
+      0%, 100% {
+        text-shadow:
+          0 0 5px rgba(255, 140, 40, 1),
+          0 0 14px rgba(255, 90, 20, 0.9),
+          0 0 28px rgba(200, 60, 10, 0.65),
+          0 0 40px rgba(120, 40, 10, 0.5),
+          1px 1px 2px rgba(30, 10, 0, 0.95);
+      }
+      50% {
+        text-shadow:
+          0 0 7px rgba(255, 180, 70, 1),
+          0 0 20px rgba(255, 110, 30, 1),
+          0 0 36px rgba(220, 80, 15, 0.85),
+          0 0 50px rgba(150, 50, 15, 0.6),
+          1px 1px 2px rgba(30, 10, 0, 0.95);
+      }
+    }
+
+    .name {
+      font-size: 3.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff5d6, #ffb347, #ff6b1a, #d2691e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+      filter: drop-shadow(0 0 20px rgba(255, 100, 20, 1))
+              drop-shadow(0 0 40px rgba(255, 60, 10, 0.6));
+    }
+    .tagline {
+      font-size: 1.2rem;
+      font-weight: 400;
+      letter-spacing: 2px;
+      margin-bottom: 2rem;
+      color: #ffd9a0;
+    }
+    .contact-info {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.8rem 2rem;
+      font-size: 1rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 2rem;
+    }
+
+    .section-title {
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin: 2.5rem 0 1rem 0;
+      color: #ffc060;
+      letter-spacing: 1px;
+    }
+
+    .job {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .job-header {
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.6rem 1rem;
+      margin-bottom: 0.6rem;
+    }
+    .job-title { font-size: 1.2rem; font-weight: 700; color: #ffd9a0; }
+    .job-company { font-size: 1rem; font-weight: 500; color: #ffb878; }
+    .job-date { font-size: 0.9rem; color: #e8b888; font-style: italic; }
+    .job-desc {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: #ffe2c0;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .skills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem;
+      margin: 0.8rem 0 1rem;
+    }
+    .skill-tag {
+      background: rgba(60, 25, 8, 0.4);
+      border-radius: 40px;
+      padding: 0.4rem 1.1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #ffe2b8;
+      box-shadow: 0 0 14px rgba(255, 100, 20, 0.35);
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(255, 120, 30, 0.2);
+      border-radius: 6px;
+      padding: 0.25rem 0.8rem;
+      font-size: 0.85rem;
+      color: #ffc87a;
+      margin: 0 0.25rem;
+    }
+
+    .highlight { color: #ffc060; font-weight: 600; }
+
+    .cert-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin: 0.5rem 0 1rem;
+      align-items: center;
+    }
+    .cert-item {
+      font-size: 0.95rem;
+      color: #ffe2c0;
+    }
+    .cert-item::before {
+      content: '✦  ';
+      color: #ff8c00;
+      text-shadow: 0 0 8px rgba(255, 140, 40, 1);
+    }
+
+    .edu-line {
+      font-size: 1rem;
+      margin-bottom: 0.6rem;
+      color: #ffe2c0;
+    }
+
+    .footer-mark {
+      margin-top: 4rem;
+      font-size: 0.95rem;
+      letter-spacing: 4px;
+      color: #e8b888;
+      text-align: center;
+    }
+
+    @media (max-width: 700px) {
+      .name { font-size: 2.4rem; }
+      .tagline { font-size: 1rem; letter-spacing: 1px; }
+      .section-title { font-size: 1.35rem; }
+      .job-header { flex-direction: column; gap: 0.15rem; }
+      .play-button { width: 110px; height: 110px; }
+      .play-button svg { width: 48px; height: 48px; }
+    }
+
+    ::-webkit-scrollbar { width: 0; display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- START SCREEN -->
+  <div class="start-screen" id="startScreen">
+    <div class="play-button">
+      <svg viewBox="0 0 24 24">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+    </div>
+    <div class="start-label">PLAY</div>
+  </div>
+
+  <!-- FULLSCREEN VIDEO BACKGROUND -->
+  <div class="video-bg" id="videoBg">
+    <video id="bgVideo" loop muted playsinline preload="auto">
+      <source src="av1.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- BACKGROUND MUSIC -->
+  <audio id="bgMusic" loop preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_5c1e9c9b21.mp3?filename=cinematic-fire-ambient-124786.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- CREDITS VIEWPORT -->
+  <div class="credits-viewport" id="creditsViewport">
+    <div class="credits-roll" id="creditsRoll">
+      <div class="credits-content">
+
+        <!-- HEADER -->
+        <div class="name">Mueen Ul Islam</div>
+        <div class="tagline">Restaurant General Manager · Operations Specialist</div>
+        <div class="contact-info">
+          <span>📞 +91 7006555062</span>
+          <span>✉️ moinranzao2@gmail.com</span>
+          <span>📍 India</span>
+        </div>
+
+        <!-- PROFILE -->
+        <div class="section-title">Profile</div>
+        <div class="job-desc">8+ years of restaurant operational expertise across QSR and casual dining. HACCP certified with a strong commitment to food safety compliance. Certified Restaurant Trainer with a Graduation in Computer Applications, enabling seamless integration of daily operational tasks with modern AI technologies to reduce human effort and enhance decision-making. Proficient in enterprise software such as Crunchtime and ISP for inventory, supply chain, and labor optimization.</div>
+        <br>
+        <div class="job-desc">Networking & Troubleshooting: Skilled in diagnosing and resolving POS system errors, intranet connectivity issues, Ethernet cable faults, and KDS reboot/communication failures. Experienced in maintaining stable restaurant IT infrastructure to minimize downtime and ensure smooth order flow.</div>
+        <br>
+        <div class="job-desc"><strong>Front-End Development:</strong> Hands-on experience building responsive, mobile-first web applications using <span class="highlight">HTML5, CSS3, and JavaScript (ES6+)</span>. Created a standalone PWA with localStorage persistence, dynamic DOM manipulation, and modular code architecture — no backend required.</div>
+        <br>
+        <div class="job-desc"><strong>Version Control & Collaboration:</strong> Proficient in <span class="highlight">Git</span> for tracking changes, branching, and merging. Active on <span class="highlight">GitHub</span> for repository hosting, version control, and project documentation. Experienced with push/pull workflows, commit hygiene, and collaborative development via pull requests. Portfolio: <span class="highlight">github.com/ghostkmr</span></div>
+
+        <!-- EXPERIENCE -->
+        <div class="section-title">Experience</div>
+
+        <!-- NEW CURRENT ROLE -->
+        <div class="job">
+          <div class="job-header">
+            <span class="job-title">Restaurant Manager</span>
+            <span class="job-company">· STANT ·</span>
+            <span class="job-date">Present</span>
+          </div>
+          <div class="job-desc">Leading daily restaurant operations with full P&L ownership, team development, and food safety compliance. Driving operational efficiency, guest experience, and cost control across all shifts.</div>
+        </div>
+
+        <div class="job">
+          <div class="job-header">
+            <span class="job-title">Store Manager</span>
+            <span class="job-company">· KUDU ·</span>
+            <span class="job-date">2024 – Present</span>
+          </div>
+          <div class="job-desc">Drove sales growth from SAR 10K to 18K+ during peak periods through operational efficiency and upselling. Maintained food cost between 29–32% and reduced waste to 15% via FIFO/FEFO/FDFO/FCFO rotation. Led 10–15 crew; trained 5+ to Crew Leader/Assistant Manager roles. Improved Google rating from 3.5 to 4.2, directly boosting customer retention. P&L, HACCP, staff development. Achieved 94%+ audit scores consistently.</div>
+        </div>
+
+        <div class="job">
+          <div class="job-header">
+            <span class="job-title">Shift Manager</span>
+            <span class="job-company">· AMERICANA ·</span>
+            <span class="job-date">2022 – 2024</span>
+          </div>
+          <div class="job-desc">Supervised 8–12 team members, audits, HACCP, inventory, POS. Trained new employees on SOPs. Consistently achieved 94%+ audit scores.</div>
+        </div>
+
+        <div class="job">
+          <div class="job-header">
+            <span class="job-title">Assistant Manager</span>
+            <span class="job-company">· GRAND MAMTA ·</span>
+            <span class="job-date">2018 – 2022</span>
+          </div>
+          <div class="job-desc">Daily operations, internal audits, inventory, FOH & kitchen coordination. Maintained food safety & hygiene. Reduced waste through portion control and stock rotation.</div>
+        </div>
+
+        <!-- CER & AUDIT -->
+        <div class="section-title">CER & Audit Performance</div>
+        <div class="job-desc"><span class="badge">CER Win Streak: Good, Good, Good</span> <span class="badge">Audit Scores: 97% · 94% · 94%</span></div>
+
+        <!-- CORE SKILLS -->
+        <div class="section-title">Core Skills</div>
+        <div class="skills-grid">
+          <span class="skill-tag">Restaurant Ops</span>
+          <span class="skill-tag">Team Leadership</span>
+          <span class="skill-tag">Inventory Control</span>
+          <span class="skill-tag">Food Cost & Waste</span>
+          <span class="skill-tag">HACCP Compliance</span>
+          <span class="skill-tag">Audit & Reporting</span>
+          <span class="skill-tag">Labor Optimization</span>
+          <span class="skill-tag">Customer Experience</span>
+          <span class="skill-tag">Google Reviews 4.2</span>
+          <span class="skill-tag">POS/KDS</span>
+          <span class="skill-tag">AI Integration</span>
+          <span class="skill-tag">Crunchtime</span>
+          <span class="skill-tag">ISP</span>
+          <span class="skill-tag">Network Troubleshooting</span>
+          <span class="skill-tag">Ethernet / Intranet</span>
+          <span class="skill-tag">KDS Reboot & Recovery</span>
+          <span class="skill-tag">Excel / Outlook</span>
+          <span class="skill-tag">HTML5</span>
+          <span class="skill-tag">CSS3</span>
+          <span class="skill-tag">JavaScript ES6+</span>
+          <span class="skill-tag">Git</span>
+          <span class="skill-tag">GitHub</span>
+          <span class="skill-tag">PWA Development</span>
+          <span class="skill-tag">localStorage</span>
+          <span class="skill-tag">Responsive Design</span>
+        </div>
+
+        <!-- CERTIFICATIONS -->
+        <div class="section-title">Certifications</div>
+        <div class="cert-list">
+          <span class="cert-item">Food Safety Certified (Hardee's / Americana)</span>
+          <span class="cert-item">CPR & First Aid · Alison</span>
+          <span class="cert-item">Effective Shift Management · KUDU</span>
+          <span class="cert-item">Leadership & Management · Alison</span>
+          <span class="cert-item">HACCP Certification · Alison</span>
+          <span class="cert-item">Restaurant Certified Trainer</span>
+          <span class="cert-item">Sales Building & Profitability · KUDU</span>
+          <span class="cert-item">Equipment Workshop · KUDU (2026)</span>
+        </div>
+
+        <!-- LANGUAGES -->
+        <div class="section-title">Languages</div>
+        <div class="skills-grid">
+          <span class="skill-tag">English</span>
+          <span class="skill-tag">Arabic</span>
+          <span class="skill-tag">Hindi</span>
+          <span class="skill-tag">Urdu</span>
+        </div>
+
+        <!-- TECHNICAL SYSTEMS -->
+        <div class="section-title">Technical Systems</div>
+        <div class="job-desc"><strong>Enterprise Software:</strong> Crunchtime (inventory, labor, supply chain), ISP (Inventory & Supply), POS (Micros, Toast), KDS, back-office reporting.</div>
+        <br>
+        <div class="job-desc"><strong>AI Integration:</strong> ChatGPT, Microsoft Copilot, Google Gemini, DeepSeek, OpenAI (GPT-4, DALL·E), Kimi 2, Claude, Perplexity, Grok, Midjourney — for predictive ordering, waste forecasting, content generation, data analysis, and operational decision support.</div>
+        <br>
+        <div class="job-desc"><strong>Front-End Development:</strong> HTML5, CSS3 (Flexbox, Grid, animations), JavaScript (ES6+, DOM manipulation, fetch API, localStorage), PWA development, responsive/mobile-first design, cross-browser compatibility.</div>
+        <br>
+        <div class="job-desc"><strong>Version Control:</strong> Git (init, clone, add, commit, push, pull, branch, merge, rebase), GitHub (repositories, issues, pull requests, GitHub Pages, README documentation).</div>
+        <br>
+        <div class="job-desc"><strong>Networking & Troubleshooting:</strong> POS system diagnostics, intranet connectivity, Ethernet cable fault finding, KDS reboot and error recovery, router/VPN configuration.</div>
+        <br>
+        <div class="job-desc"><strong>Productivity:</strong> Excel (pivot tables), Outlook, network troubleshooting (IP, DNS, router, VPN).</div>
+
+        <!-- ACHIEVEMENTS -->
+        <div class="section-title">Achievements</div>
+        <div class="job-desc"><span class="badge">Double Platinum Audit Award</span> <span class="badge">Excellent Food Safety</span></div>
+        <br>
+        <div class="job-desc">Drove sales from SAR 10K to 18K+ · 15% waste reduction · Food cost maintained 29–32% · strict FIFO/FEFO/FDFO/FCFO · Developed 5+ crew into Team Leaders & Assistant Managers · Improved Google rating from 3.5 to 4.2 · increased retention</div>
+
+        <!-- HOBBIES -->
+        <div class="section-title">Hobbies & Interests</div>
+        <div class="job-desc">Reading — Passionate about reading books on restaurant management, leadership, food industry trends, and technology innovations to stay ahead in the ever-evolving hospitality sector.</div>
+        <br>
+        <div class="job-desc">Learning New Skills — Continuously upskilling through online courses, workshops, and industry certifications related to operations management, AI integration, data analytics, front-end development, and emerging restaurant technologies to unlock future career opportunities and drive professional growth.</div>
+
+        <!-- EDUCATION -->
+        <div class="section-title">Education</div>
+        <div class="edu-line"><strong>BCA · Kashmir University (2013)</strong> – Computer Applications</div>
+        <div class="edu-line"><strong>12th Science · J&K Board (2009)</strong> – 1st Division</div>
+        <div class="edu-line"><strong>10th · J&K Board (2007)</strong> – Distinction</div>
+
+        <!-- FOOTER -->
+        <div class="footer-mark">ghostkmr.github.io/2026</div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const startScreen   = document.getElementById('startScreen');
+    const videoBg       = document.getElementById('videoBg');
+    const creditsView   = document.getElementById('creditsViewport');
+    const creditsRoll   = document.getElementById('creditsRoll');
+    const video         = document.getElementById('bgVideo');
+    const music         = document.getElementById('bgMusic');
+
+    video.volume = 0.5;
+    music.volume = 0.35;
+
+    startScreen.addEventListener('click', startExperience, { once: true });
+
+    function startExperience() {
+      startScreen.classList.add('hidden');
+      videoBg.classList.add('active');
+      creditsView.classList.add('active');
+
+      video.muted = false;
+      video.volume = 0.5;
+      const vp = video.play();
+      if (vp && vp.catch) vp.catch(err => console.warn('Video play error:', err));
+
+      const mp = music.play();
+      if (mp && mp.catch) mp.catch(err => console.warn('Music play error:', err));
+
+      requestAnimationFrame(() => {
+        const contentHeight = creditsRoll.scrollHeight;
+        const viewportHeight = window.innerHeight;
+        const PIXELS_PER_SECOND = 55;
+        const seconds = (contentHeight + viewportHeight) / PIXELS_PER_SECOND;
+        creditsRoll.style.setProperty('--roll-duration', seconds + 's');
+      });
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && videoBg.classList.contains('active')) {
+        const p = video.play();
+        if (p && p.catch) p.catch(() => {});
+        const m = music.play();
+        if (m && m.catch) m.catch(() => {});
+      }
+    });
+  </script>
+</body>
+</html>
