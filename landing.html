@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>Withstand | Building Qatar's Future</title>
+
+  <!-- ========== FAVICON (shield emblem, matches brand) ========== -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%236b7280'/%3E%3Cstop offset='100%25' stop-color='%234b5563'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23g)'/%3E%3Cpath d='M50 18 L74 28 V48 C74 62 63 74 50 80 C37 74 26 62 26 48 V28 Z' fill='none' stroke='white' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M50 30 L66 37 V50 C66 60 58 68 50 72 C42 68 34 60 34 50 V37 Z' fill='white' opacity='0.9'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236b7280'/%3E%3Cpath d='M50 18 L74 28 V48 C74 62 63 74 50 80 C37 74 26 62 26 48 V28 Z' fill='none' stroke='white' stroke-width='6' stroke-linejoin='round'/%3E%3Cpath d='M50 30 L66 37 V50 C66 60 58 68 50 72 C42 68 34 60 34 50 V37 Z' fill='white' opacity='0.9'/%3E%3C/svg%3E">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -58,13 +63,7 @@
       --nav-hover-bg: rgba(156, 163, 175, 0.12);
     }
 
-    /* ---------- Global Reset ---------- */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
 
     body {
@@ -78,32 +77,24 @@
     }
 
     [dir="rtl"] body,
-    [dir="rtl"] {
-      font-family: 'Noto Kufi Arabic', 'Inter', sans-serif;
-    }
+    [dir="rtl"] { font-family: 'Noto Kufi Arabic', 'Inter', sans-serif; }
 
     [lang="hi"] body,
-    [lang="hi"] {
-      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
-    }
+    [lang="hi"] { font-family: 'Noto Sans Devanagari', 'Inter', sans-serif; }
 
     /* ========== BACKGROUND SLIDESHOW ========== */
     .bg-slideshow {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       z-index: 0;
       overflow: hidden;
     }
 
     .bg-slide {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -112,18 +103,13 @@
       transform: scale(1.05);
     }
 
-    .bg-slide.active {
-      opacity: 1;
-      transform: scale(1);
-    }
+    .bg-slide.active { opacity: 1; transform: scale(1); }
 
     .bg-slide::after {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: linear-gradient(
         135deg,
         rgba(15, 20, 25, 0.82) 0%,
@@ -170,9 +156,7 @@
       transition: background 0.4s ease, box-shadow 0.3s ease;
     }
 
-    .site-header.scrolled {
-      box-shadow: var(--shadow-md);
-    }
+    .site-header.scrolled { box-shadow: var(--shadow-md); }
 
     .header-inner {
       display: flex;
@@ -182,7 +166,6 @@
       gap: 1.5rem;
     }
 
-    /* Logo */
     .brand {
       display: flex;
       align-items: center;
@@ -210,10 +193,8 @@
     .brand-emblem::after {
       content: '';
       position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
       background: linear-gradient(45deg, transparent, rgba(255,255,255,0.25), transparent);
       transform: rotate(45deg);
       transition: left 0.5s;
@@ -240,7 +221,6 @@
       color: var(--text-secondary);
     }
 
-    /* Main Navigation */
     .main-nav { display: flex; align-items: center; }
 
     .nav-list {
@@ -284,7 +264,6 @@
 
     .nav-item.open > .nav-link .chevron { transform: rotate(180deg); }
 
-    /* Dropdown */
     .dropdown {
       position: absolute;
       top: calc(100% + 8px);
@@ -355,7 +334,6 @@
       margin-top: 1px;
     }
 
-    /* "Coming Soon" badge */
     .soon-badge {
       display: inline-block;
       font-size: 0.62rem;
@@ -372,7 +350,6 @@
 
     [dir="rtl"] .soon-badge { margin-left: 0; margin-right: auto; }
 
-    /* Header Actions */
     .header-actions {
       display: flex;
       align-items: center;
@@ -380,7 +357,6 @@
       flex-shrink: 0;
     }
 
-    /* Language Toggle — now with three options */
     .lang-switch {
       display: flex;
       background: var(--toggle-bg);
@@ -413,7 +389,6 @@
 
     .lang-opt:hover:not(.active) { color: var(--text-primary); }
 
-    /* Theme Toggle */
     .theme-switch {
       width: 52px;
       height: 30px;
@@ -457,7 +432,6 @@
 
     [data-theme="dark"] .theme-knob { transform: translateX(22px); }
 
-    /* Mobile menu toggle */
     .menu-toggle {
       display: none;
       background: transparent;
@@ -475,7 +449,7 @@
 
     .menu-toggle:hover { background: var(--nav-hover-bg); }
 
-    /* ========== HERO SECTION ========== */
+    /* ========== HERO ========== */
     .hero {
       flex: 1;
       display: flex;
@@ -516,7 +490,6 @@
       display: inline-block;
     }
 
-    /* Slideshow indicators */
     .slide-indicators {
       position: absolute;
       bottom: 2.5rem;
@@ -545,6 +518,115 @@
     }
 
     .slide-dot:hover:not(.active) { background: rgba(255, 255, 255, 0.6); }
+
+    /* ========== ABOUT DEV FLOATING BUTTON (BOTTOM RIGHT) ========== */
+    .about-dev-fab {
+      position: fixed;
+      bottom: 1.75rem;
+      right: 1.75rem;
+      z-index: 1200;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.75rem 1.15rem 0.75rem 0.75rem;
+      background: var(--bg-card-solid);
+      border: 1px solid var(--border-medium);
+      border-radius: 60px;
+      text-decoration: none;
+      color: var(--text-primary);
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      overflow: hidden;
+    }
+
+    [dir="rtl"] .about-dev-fab {
+      right: auto;
+      left: 1.75rem;
+      padding: 0.75rem 0.75rem 0.75rem 1.15rem;
+    }
+
+    .about-dev-fab:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 40px rgba(107, 114, 128, 0.35);
+      background: var(--grey-soft);
+    }
+
+    .about-dev-fab:hover .about-dev-icon {
+      transform: rotate(-8deg) scale(1.08);
+    }
+
+    .about-dev-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--grey-accent) 0%, var(--grey-accent-hover) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.05rem;
+      box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
+      flex-shrink: 0;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-dev-icon::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+      transform: rotate(45deg);
+      transition: left 0.6s;
+    }
+
+    .about-dev-fab:hover .about-dev-icon::after { left: 100%; }
+
+    .about-dev-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+      white-space: nowrap;
+    }
+
+    .about-dev-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .about-dev-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .about-dev-icon::before {
+      content: '';
+      position: absolute;
+      top: -3px; right: -3px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 0 rgba(196, 163, 90, 0.7);
+      animation: fabPulse 2s infinite;
+      z-index: 2;
+    }
+
+    @keyframes fabPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(196, 163, 90, 0.7); }
+      70%  { box-shadow: 0 0 0 10px rgba(196, 163, 90, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(196, 163, 90, 0); }
+    }
 
     /* ========== MOBILE MENU ========== */
     .mobile-overlay {
@@ -694,6 +776,19 @@
       .slide-indicators { bottom: 1.5rem; }
       .header-actions { gap: 0.5rem; }
       .dropdown { min-width: 240px; }
+
+      .about-dev-fab {
+        bottom: 1.25rem;
+        right: 1.25rem;
+        padding: 0.6rem;
+      }
+      [dir="rtl"] .about-dev-fab {
+        right: auto;
+        left: 1.25rem;
+        padding: 0.6rem;
+      }
+      .about-dev-text { display: none; }
+      .about-dev-icon { width: 44px; height: 44px; font-size: 1.15rem; }
     }
 
     @media (max-width: 480px) {
@@ -724,7 +819,7 @@
 </head>
 <body>
 
-  <!-- ========== BACKGROUND SLIDESHOW (5 slides) ========== -->
+  <!-- ========== BACKGROUND SLIDESHOW ========== -->
   <div class="bg-slideshow" aria-hidden="true">
     <div class="bg-slide active" style="background-image: url('https://ghostkmr.github.io/withstand/11.webp');"></div>
     <div class="bg-slide" style="background-image: url('https://ghostkmr.github.io/withstand/12.webp');"></div>
@@ -738,7 +833,6 @@
     <!-- ========== HEADER ========== -->
     <header class="site-header" id="siteHeader">
       <div class="container header-inner">
-        <!-- Brand -->
         <a href="#" class="brand">
           <div class="brand-emblem"><i class="fas fa-shield-halved"></i></div>
           <div class="brand-text">
@@ -747,7 +841,6 @@
           </div>
         </a>
 
-        <!-- Desktop Nav — Home + In-Store Trackers dropdown only -->
         <nav class="main-nav" aria-label="Main navigation">
           <ul class="nav-list">
             <li class="nav-item">
@@ -780,7 +873,6 @@
           </ul>
         </nav>
 
-        <!-- Header Actions -->
         <div class="header-actions">
           <div class="lang-switch" role="group" aria-label="Language selector">
             <button class="lang-opt active" id="langEn" aria-pressed="true">EN</button>
@@ -814,7 +906,6 @@
         </div>
       </div>
 
-      <!-- Slideshow indicators (5 dots) -->
       <div class="slide-indicators" role="tablist" aria-label="Background slides">
         <button class="slide-dot active" data-slide="0" aria-label="Slide 1"></button>
         <button class="slide-dot" data-slide="1" aria-label="Slide 2"></button>
@@ -825,6 +916,20 @@
     </section>
 
   </div>
+
+  <!-- ========== ABOUT DEVELOPER FLOATING BUTTON (BOTTOM RIGHT) ========== -->
+  <a href="https://ghostkmr.github.io/withstand/dev.html"
+     class="about-dev-fab"
+     title="About Developer"
+     aria-label="About Developer">
+    <div class="about-dev-icon">
+      <i class="fas fa-shield-halved"></i>
+    </div>
+    <div class="about-dev-text">
+      <span class="about-dev-label" data-i18n="fabLabel">About</span>
+      <span class="about-dev-name" data-i18n="fabName">Developer</span>
+    </div>
+  </a>
 
   <!-- ========== MOBILE MENU ========== -->
   <div class="mobile-overlay" id="mobileOverlay"></div>
@@ -891,7 +996,9 @@
           menu1Item2Desc: "Coming soon",
           heroWithstand: "Withstand",
           heroTitle1: "Building the future of",
-          heroTitle2: "Qatar's enterprises"
+          heroTitle2: "Qatar's enterprises",
+          fabLabel: "About",
+          fabName: "Developer"
         },
         ar: {
           brandName: "ويذستاند",
@@ -905,7 +1012,9 @@
           menu1Item2Desc: "قريباً",
           heroWithstand: "ويذستاند",
           heroTitle1: "نبني مستقبل",
-          heroTitle2: "المؤسسات القطرية"
+          heroTitle2: "المؤسسات القطرية",
+          fabLabel: "حول",
+          fabName: "المطور"
         },
         hi: {
           brandName: "विदस्टैंड",
@@ -919,7 +1028,9 @@
           menu1Item2Desc: "जल्द आ रहा है",
           heroWithstand: "विदस्टैंड",
           heroTitle1: "भविष्य का निर्माण",
-          heroTitle2: "कतर के उद्यमों"
+          heroTitle2: "कतर के उद्यमों",
+          fabLabel: "परिचय",
+          fabName: "डेवलपर"
         }
       };
 
@@ -949,7 +1060,6 @@
 
       /* ================= LANGUAGE ================= */
       function updateLanguage() {
-        // Set lang and dir
         if (currentLang === 'ar') {
           htmlRoot.lang = 'ar';
           htmlRoot.dir = 'rtl';
@@ -961,7 +1071,6 @@
           htmlRoot.dir = 'ltr';
         }
 
-        // Desktop buttons
         langEn.classList.toggle('active', currentLang === 'en');
         langAr.classList.toggle('active', currentLang === 'ar');
         langHi.classList.toggle('active', currentLang === 'hi');
@@ -969,7 +1078,6 @@
         langAr.setAttribute('aria-pressed', currentLang === 'ar');
         langHi.setAttribute('aria-pressed', currentLang === 'hi');
 
-        // Mobile buttons
         if (langEnMobile) {
           langEnMobile.classList.toggle('active', currentLang === 'en');
           langArMobile.classList.toggle('active', currentLang === 'ar');
@@ -979,7 +1087,6 @@
           langHiMobile.setAttribute('aria-pressed', currentLang === 'hi');
         }
 
-        // Translate all i18n elements
         i18nElements.forEach(el => {
           const key = el.getAttribute('data-i18n');
           if (translations[currentLang] && translations[currentLang][key] !== undefined) {
