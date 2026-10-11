@@ -1,0 +1,2426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Tracker - Corporate Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        :root {
+            --sidebar-bg: #1e2836;
+            --sidebar-text: #b8c2cc;
+            --sidebar-active-bg: #2d3e50;
+            --sidebar-active-text: #ffffff;
+            --sidebar-hover-bg: #253243;
+            --topbar-bg: #ffffff;
+            --body-bg: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-muted: #8492a6;
+            --border-color: #e4e8ef;
+            --accent: #1e63e9;
+            --accent-dark: #1549b3;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --purple: #8b5cf6;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.07);
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 70px;
+            --topbar-height: 64px;
+        }
+
+        [data-theme="dark"] {
+            --sidebar-bg: #0f1720;
+            --sidebar-text: #7a8699;
+            --sidebar-active-bg: #1e2936;
+            --sidebar-active-text: #ffffff;
+            --sidebar-hover-bg: #16202c;
+            --topbar-bg: #1a2332;
+            --body-bg: #0b1219;
+            --card-bg: #1a2332;
+            --text-main: #e2e8f0;
+            --text-muted: #8b96a8;
+            --border-color: #2a3444;
+            --accent: #4a8bf5;
+            --accent-dark: #3b7ae0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--body-bg);
+            color: var(--text-main);
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            transition: width 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-brand {
+            height: var(--topbar-height);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sidebar-brand-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #1e63e9, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand-text {
+            margin-left: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.3px;
+            opacity: 1;
+            transition: opacity 0.2s;
+        }
+
+        .sidebar.collapsed .sidebar-brand-text {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 15px 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        .nav-section-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 15px 22px 8px;
+            color: rgba(255,255,255,0.25);
+            white-space: nowrap;
+            transition: opacity 0.2s;
+        }
+
+        .sidebar.collapsed .nav-section-title {
+            opacity: 0;
+            height: 20px;
+            padding: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 11px 22px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 13.5px;
+            font-weight: 500;
+            transition: background-color 0.15s, color 0.15s;
+            white-space: nowrap;
+            border-left: 3px solid transparent;
+            user-select: none;
+        }
+
+        .nav-item:hover { background-color: var(--sidebar-hover-bg); color: #fff; }
+        .nav-item.active {
+            background-color: var(--sidebar-active-bg);
+            color: var(--sidebar-active-text);
+            border-left-color: var(--accent);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 15px;
+        }
+
+        .nav-text {
+            margin-left: 14px;
+            opacity: 1;
+            transition: opacity 0.2s;
+        }
+
+        .sidebar.collapsed .nav-text { opacity: 0; pointer-events: none; }
+        .sidebar.collapsed .nav-item { padding: 11px 25px; }
+
+        .sidebar-footer {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            font-size: 11px;
+            color: rgba(255,255,255,0.25);
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed .sidebar-footer { text-align: center; padding: 15px 5px; }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .main-content.expanded { margin-left: var(--sidebar-collapsed-width); }
+
+        /* TOPBAR */
+        .topbar {
+            height: var(--topbar-height);
+            background-color: var(--topbar-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            transition: background-color 0.3s;
+        }
+
+        .topbar-left { display: flex; align-items: center; gap: 15px; }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: background-color 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .menu-toggle:hover { background-color: var(--border-color); }
+
+        .page-title { font-size: 16px; font-weight: 700; color: var(--text-main); margin: 0; }
+        .page-subtitle { font-size: 12px; color: var(--text-muted); margin: 0; }
+
+        .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+        .live-clock-compact {
+            background-color: var(--body-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 14px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .live-clock-compact .time {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .live-clock-compact .date { font-size: 10px; color: var(--text-muted); }
+
+        .theme-toggle-btn, .lang-select {
+            background-color: var(--body-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 8px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.15s;
+        }
+
+        .theme-toggle-btn:hover { background-color: var(--border-color); }
+
+        /* PAGE CONTENT */
+        .page-content { padding: 22px 25px; display: none; }
+        .page-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* STORE DETAILS BANNER */
+        .store-banner {
+            background: linear-gradient(135deg, #1e63e9 0%, #5b21b6 100%);
+            color: #fff;
+            border-radius: 12px;
+            padding: 18px 24px;
+            margin-bottom: 18px;
+            box-shadow: 0 6px 20px rgba(30, 99, 233, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        [data-theme="dark"] .store-banner {
+            background: linear-gradient(135deg, #1a3a8f 0%, #4a1a8f 100%);
+        }
+
+        .store-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .store-avatar {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .store-name-display {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .store-location-display {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-top: 2px;
+        }
+
+        .store-edit-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .store-edit-btn:hover { background-color: rgba(255, 255, 255, 0.3); }
+
+        /* STORE EDIT MODAL */
+        .store-edit-modal .modal-header {
+            background: linear-gradient(135deg, #1e63e9, #5b21b6);
+            color: #fff;
+            border-radius: 14px 14px 0 0;
+            border-bottom: none;
+        }
+
+        .store-edit-modal .modal-title { font-weight: 700; }
+        .store-edit-modal .btn-close { filter: invert(1); }
+
+        /* KPI CARDS */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 18px;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .kpi-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .kpi-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+        }
+
+        .kpi-icon.blue { background: linear-gradient(135deg, #1e63e9, #4a8bf5); }
+        .kpi-icon.green { background: linear-gradient(135deg, #10b981, #34d399); }
+        .kpi-icon.purple { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+        .kpi-icon.orange { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+
+        .kpi-value { font-size: 24px; font-weight: 700; color: var(--text-main); line-height: 1.1; }
+        .kpi-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+        /* CARDS */
+        .corp-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 18px;
+            transition: background-color 0.3s;
+        }
+
+        .corp-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .corp-card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .corp-card-subtitle { font-size: 12px; color: var(--text-muted); margin: 0; }
+
+        /* CHARTS */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        @media (max-width: 992px) { .charts-row { grid-template-columns: 1fr; } }
+
+        .chart-compact, .chart-doughnut { position: relative; height: 180px; }
+
+        .chart-center-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .chart-center-label .value { font-size: 20px; font-weight: 700; color: var(--text-main); line-height: 1; }
+        .chart-center-label .label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-top: 3px;
+            letter-spacing: 0.8px;
+        }
+
+        /* FORM CONTROLS */
+        .form-control, .form-select {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 13.5px;
+            padding: 8px 12px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(30, 99, 233, 0.12);
+        }
+
+        [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        /* BUTTONS */
+        .btn {
+            border-radius: 8px;
+            font-size: 13.5px;
+            font-weight: 600;
+            padding: 8px 16px;
+            transition: all 0.15s;
+        }
+
+        .btn-primary { background-color: var(--accent); border-color: var(--accent); }
+        .btn-primary:hover { background-color: var(--accent-dark); border-color: var(--accent-dark); }
+
+        /* TABLE */
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+        }
+
+        .table {
+            margin-bottom: 0;
+            font-size: 13px;
+            color: var(--text-main) !important;
+            background-color: transparent !important;
+            --bs-table-bg: transparent;
+            --bs-table-color: var(--text-main);
+            --bs-table-border-color: var(--border-color);
+        }
+
+        .table thead th {
+            background-color: var(--body-bg) !important;
+            color: var(--text-muted) !important;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-color) !important;
+            border-top: none !important;
+            padding: 12px 14px;
+        }
+
+        .table tbody td {
+            padding: 12px 14px;
+            border-color: var(--border-color) !important;
+            color: var(--text-main) !important;
+            background-color: transparent !important;
+            vertical-align: middle;
+        }
+
+        .table tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.15s; }
+        .table tbody tr:last-child { border-bottom: none; }
+        .table tbody tr:hover td { background-color: var(--body-bg) !important; color: var(--text-main) !important; }
+
+        .table .no-data-cell {
+            color: var(--text-muted) !important;
+            text-align: center;
+            padding: 25px 10px;
+            font-style: italic;
+        }
+
+        /* LIVE TOTALS COMPACT */
+        .live-totals-compact {
+            display: flex;
+            gap: 15px;
+            background-color: var(--body-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin-top: 15px;
+        }
+
+        .lt-item { flex: 1; text-align: center; }
+        .lt-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+        .lt-value { font-size: 20px; font-weight: 700; color: var(--success); margin-top: 4px; }
+
+        /* PREDICTION PANEL */
+        .prediction-corp {
+            background: linear-gradient(135deg, #1e3a8a 0%, #5b21b6 100%);
+            color: #fff;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 18px;
+            box-shadow: 0 6px 20px rgba(30, 58, 138, 0.25);
+        }
+
+        [data-theme="dark"] .prediction-corp {
+            background: linear-gradient(135deg, #1a2a5e 0%, #3d1573 100%);
+        }
+
+        .prediction-corp .pred-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            opacity: 0.8;
+            margin-bottom: 6px;
+        }
+
+        .prediction-corp .pred-value { font-size: 30px; font-weight: 700; margin: 0; line-height: 1; }
+        .prediction-corp .pred-sub { font-size: 12px; opacity: 0.85; margin-top: 6px; }
+
+        .conf-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .conf-high { background-color: rgba(16, 185, 129, 0.3); border: 1px solid #10b981; }
+        .conf-med { background-color: rgba(245, 158, 11, 0.3); border: 1px solid #f59e0b; }
+        .conf-low { background-color: rgba(239, 68, 68, 0.3); border: 1px solid #ef4444; }
+
+        .trend-up { color: #6ee7b7; }
+        .trend-down { color: #fca5a5; }
+        .trend-flat { color: #fcd34d; }
+
+        /* HISTORY BOX */
+        .history-corp {
+            background-color: var(--body-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px 18px;
+            margin-bottom: 15px;
+        }
+
+        .history-result-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 768px) { .history-result-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .history-item {
+            text-align: center;
+            padding: 12px 8px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .history-item .label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+
+        .history-item .value { font-size: 20px; font-weight: 700; color: var(--accent); margin-top: 5px; }
+
+        /* RANGE BOX */
+        .range-corp {
+            background-color: var(--body-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px 18px;
+            margin-bottom: 15px;
+        }
+
+        /* DANGER ZONE */
+        .danger-corp {
+            background-color: rgba(239, 68, 68, 0.06);
+            border: 1px dashed rgba(239, 68, 68, 0.4);
+            border-radius: 10px;
+            padding: 20px 22px;
+        }
+
+        .danger-corp .danger-title {
+            color: var(--danger);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        /* MODALS */
+        .modal-content {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+        }
+
+        .modal-header, .modal-footer { border-color: var(--border-color); }
+        .modal-title { font-weight: 700; }
+
+        .password-error {
+            color: var(--danger);
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); width: var(--sidebar-width) !important; }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-left: 0 !important; }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .live-clock-compact { display: none; }
+            .page-content { padding: 15px; }
+            .live-totals-compact { flex-direction: column; gap: 10px; }
+            .store-banner { flex-direction: column; text-align: center; }
+        }
+
+        /* UTILITY */
+        .text-muted-sm { font-size: 12px; color: var(--text-muted); }
+        .fw-bold { font-weight: 700; }
+        .text-accent { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+<!-- ============================================ -->
+<!-- SIDEBAR -->
+<!-- ============================================ -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">S</div>
+        <div class="sidebar-brand-text">SalesTrack Pro</div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section-title">Main</div>
+
+        <a class="nav-item active" data-page="page-entry" onclick="navigateTo('page-entry', this)">
+            <span class="nav-icon">📝</span>
+            <span class="nav-text" id="navTextEntry">Data Entry</span>
+        </a>
+
+        <a class="nav-item" data-page="page-dashboard" onclick="navigateTo('page-dashboard', this)">
+            <span class="nav-icon">📊</span>
+            <span class="nav-text" id="navTextDashboard">Dashboard</span>
+        </a>
+
+        <a class="nav-item" data-page="page-prediction" onclick="navigateTo('page-prediction', this)">
+            <span class="nav-icon">🔮</span>
+            <span class="nav-text" id="navTextPrediction">AI Prediction</span>
+        </a>
+
+        <div class="nav-section-title">Analysis</div>
+
+        <a class="nav-item" data-page="page-history" onclick="navigateTo('page-history', this)">
+            <span class="nav-icon">📅</span>
+            <span class="nav-text" id="navTextHistory">Historical</span>
+        </a>
+
+        <a class="nav-item" data-page="page-range" onclick="navigateTo('page-range', this)">
+            <span class="nav-icon">⏱️</span>
+            <span class="nav-text" id="navTextRange">Time Range</span>
+        </a>
+
+        <div class="nav-section-title">Actions</div>
+
+        <a class="nav-item" data-page="page-export" onclick="navigateTo('page-export', this)">
+            <span class="nav-icon">📤</span>
+            <span class="nav-text" id="navTextExport">Export</span>
+        </a>
+
+        <a class="nav-item" data-page="page-danger" onclick="navigateTo('page-danger', this)">
+            <span class="nav-icon">⚠️</span>
+            <span class="nav-text" id="navTextDanger">Danger Zone</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div id="sidebarFooterText">v2.0 Corporate Edition</div>
+    </div>
+</aside>
+
+<!-- ============================================ -->
+<!-- MAIN CONTENT -->
+<!-- ============================================ -->
+<div class="main-content" id="mainContent">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <button class="menu-toggle" onclick="toggleSidebar()" title="Toggle Menu">☰</button>
+            <div>
+                <div class="page-title" id="topbarTitle">Data Entry</div>
+                <div class="page-subtitle" id="topbarSubtitle">Enter hourly sales and guest data</div>
+            </div>
+        </div>
+
+        <div class="topbar-right">
+            <div class="live-clock-compact">
+                <div class="time" id="liveTime">--:--:-- --</div>
+                <div class="date" id="liveDate">--</div>
+            </div>
+
+            <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle Theme">🌙</button>
+
+            <select class="lang-select" id="languageSelector" onchange="changeLanguage()">
+                <option value="en">EN</option>
+                <option value="hi">HI</option>
+                <option value="ar">AR</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PAGE: DATA ENTRY -->
+    <!-- ============================================ -->
+    <div class="page-content active" id="page-entry">
+
+        <!-- STORE DETAILS BANNER -->
+        <div class="store-banner">
+            <div class="store-info">
+                <div class="store-avatar">🏪</div>
+                <div>
+                    <h5 class="store-name-display" id="storeNameDisplay">My Store</h5>
+                    <div class="store-location-display" id="storeLocationDisplay">Location not set</div>
+                </div>
+            </div>
+            <button class="store-edit-btn" onclick="openStoreEditModal()" id="btnEditStore">✏️ Edit Store Info</button>
+        </div>
+
+        <div class="corp-card">
+            <div class="corp-card-header">
+                <div>
+                    <h5 class="corp-card-title" id="entryCardTitle">➕ Enter Hourly Data</h5>
+                    <p class="corp-card-subtitle" id="entryCardSub">Add sales and guest count for a specific hour</p>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label" id="lblDate">Date</label>
+                    <input type="date" id="inputDate" class="form-control" onchange="updateLiveTotals(); renderEntryTable();">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" id="lblHour">Select Hour</label>
+                    <select id="inputHour" class="form-select"></select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" id="lblSales">Sales Amount</label>
+                    <input type="number" id="inputSales" class="form-control" placeholder="0.00">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" id="lblGuests">Guest Count</label>
+                    <input type="number" id="inputGuests" class="form-control" placeholder="0">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" onclick="saveData()" id="btnSave">Save Entry</button>
+                </div>
+            </div>
+
+            <div class="live-totals-compact">
+                <div class="lt-item">
+                    <div class="lt-label" id="ltSalesLabel">Running Sales</div>
+                    <div class="lt-value" id="liveTotalSales">0.00</div>
+                </div>
+                <div class="lt-item">
+                    <div class="lt-label" id="ltGuestsLabel">Running TC</div>
+                    <div class="lt-value" id="liveTotalGuests">0</div>
+                </div>
+                <div class="lt-item">
+                    <div class="lt-label" id="ltAvgLabel">Running AC</div>
+                    <div class="lt-value" id="liveTotalAvg">0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="corp-card">
+            <div class="corp-card-header">
+                <div>
+                    <h5 class="corp-card-title" id="todayCardTitle">📋 Entries for Selected Date</h5>
+                    <p class="corp-card-subtitle" id="todayCardSub">Hourly breakdown of the chosen date</p>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th id="thHour">Hour</th>
+                            <th id="thSales">Sales</th>
+                            <th id="thGuests">Guests</th>
+                            <th id="thAvg">Avg Check</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PAGE: DASHBOARD -->
+    <!-- ============================================ -->
+    <div class="page-content" id="page-dashboard">
+        <div class="row align-items-end mb-3 g-2">
+            <div class="col-md-3">
+                <label class="form-label" id="lblViewDate">View Data For Date</label>
+                <input type="date" id="viewDate" class="form-control" onchange="renderDashboard()">
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-secondary w-100" onclick="renderDashboard()" id="btnRefresh">Refresh</button>
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-label" id="kpiSalesLabel">Total Sales</div>
+                    <div class="kpi-icon blue">💵</div>
+                </div>
+                <div class="kpi-value" id="valTotalSales">0</div>
+                <div class="kpi-sub" id="kpiSalesSub">For selected day</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-label" id="kpiGuestsLabel">Total Guests</div>
+                    <div class="kpi-icon green">👥</div>
+                </div>
+                <div class="kpi-value" id="valTotalGuests">0</div>
+                <div class="kpi-sub" id="kpiGuestsSub">TC count</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-label" id="kpiAvgLabel">Avg Check</div>
+                    <div class="kpi-icon purple">📈</div>
+                </div>
+                <div class="kpi-value" id="valAvgCheck">0</div>
+                <div class="kpi-sub" id="kpiAvgSub">Per guest</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <div class="kpi-label" id="kpiForecastLabel">Forecast</div>
+                    <div class="kpi-icon orange">🔮</div>
+                </div>
+                <div class="kpi-value" id="valForecast" style="font-size: 18px;">- / -</div>
+                <div class="kpi-sub" id="kpiForecastSub">Next hour / day</div>
+            </div>
+        </div>
+
+        <div class="charts-row">
+            <div class="corp-card">
+                <div class="corp-card-header">
+                    <h5 class="corp-card-title" id="chartSalesTitle">💵 Sales Share</h5>
+                </div>
+                <div class="chart-doughnut">
+                    <canvas id="salesDoughnut"></canvas>
+                    <div class="chart-center-label">
+                        <div class="value" id="salesDoughnutCenter">0</div>
+                        <div class="label" id="salesDoughnutLabel">Sales</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="corp-card">
+                <div class="corp-card-header">
+                    <h5 class="corp-card-title" id="chartGuestsTitle">👥 Guest Share</h5>
+                </div>
+                <div class="chart-doughnut">
+                    <canvas id="guestsDoughnut"></canvas>
+                    <div class="chart-center-label">
+                        <div class="value" id="guestsDoughnutCenter">0</div>
+                        <div class="label" id="guestsDoughnutLabel">Guests</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="corp-card">
+                <div class="corp-card-header">
+                    <h5 class="corp-card-title" id="chartTrendTitle">📊 Peak Hours</h5>
+                </div>
+                <div class="chart-compact">
+                    <canvas id="hourlyBar"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PAGE: PREDICTION -->
+    <!-- ============================================ -->
+    <div class="page-content" id="page-prediction">
+        <div class="row align-items-end mb-3 g-2">
+            <div class="col-md-3">
+                <label class="form-label" id="lblPredictionDate">Prediction Based On Date</label>
+                <input type="date" id="predictionDate" class="form-control" onchange="updatePrediction()">
+            </div>
+        </div>
+
+        <div class="prediction-corp">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="pred-title" id="predictionTitle">AI Sales Prediction</div>
+                    <div class="d-flex align-items-baseline gap-3 flex-wrap">
+                        <h2 class="pred-value" id="predictionValue">--</h2>
+                        <span id="predictionTrend" class="pred-sub"></span>
+                    </div>
+                    <div class="pred-sub" id="predictionDetail">Enter at least 3 hours of data to enable prediction.</div>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <div class="pred-title" id="confidenceLabel">Confidence</div>
+                    <span id="confidenceBadge" class="conf-badge conf-low">Low</span>
+                    <div class="pred-sub" id="basedOnLabel">Based on 0 hours</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="corp-card">
+            <div class="corp-card-header">
+                <div>
+                    <h5 class="corp-card-title" id="predExplainTitle">📘 How This Works</h5>
+                </div>
+            </div>
+            <p class="text-muted-sm" id="predExplainText">
+                The system uses linear regression to analyze the hourly sales trend and predict the next expected value.
+                Confidence level increases as more hours of data become available.
+            </p>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PAGE: HISTORY -->
+    <!-- ============================================ -->
+    <div class="page-content" id="page-history">
+        <div class="corp-card">
+            <div class="corp-card-header">
+                <div>
+                    <h5 class="corp-card-title" id="historyTitle">📅 Historical Data Retrieval</h5>
+                    <p class="corp-card-subtitle" id="historySub">Select a custom date range to analyze</p>
+                </div>
+            </div>
+
+            <div class="history-corp">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label" id="lblHistoryFrom">From Date</label>
+                        <input type="date" id="historyFromDate" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" id="lblHistoryTo">To Date</label>
+                        <input type="date" id="historyToDate" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary w-100" onclick="calculateHistory()" id="btnCalculateHistory">Calculate Range</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-secondary w-100" onclick="resetToDayView()" id="btnResetView" style="display:none;">Reset View</button>
+                    </div>
+                </div>
+
+                <div class="row g-2 mt-2">
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="setQuickRange('month')" id="btnQuickMonth">This Month</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="setQuickRange('year')" id="btnQuickYear">This Year</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="setQuickRange('last30')" id="btnQuickLast30">Last 30 Days</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="setQuickRange('today')" id="btnQuickToday">Today Only</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="historyResultBox" class="history-result-grid" style="display:none;">
+                <div class="history-item">
+                    <div class="label" id="historyResultSalesLabel">Total Sales</div>
+                    <div class="value" id="historyResultSales">0.00</div>
+                </div>
+                <div class="history-item">
+                    <div class="label" id="historyResultGuestsLabel">Total Guests</div>
+                    <div class="value" id="historyResultGuests">0</div>
+                </div>
+                <div class="history-item">
+                    <div class="label" id="historyResultAvgLabel">Avg Check</div>
+                    <div class="value" id="historyResultAvg">0.00</div>
+                </div>
+                <div class="history-item">
+                    <div class="label" id="historyResultDaysLabel">Days</div>
+                    <div class="value" id="historyResultDays">0</div>
+                </div>
+            </div>
+
+            <h6 class="mt-4 mb-2" id="historyResultTitle" style="display:none; color: var(--text-muted); font-size: 12px;"></h6>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PAGE: TIME RANGE -->
+    <!-- ============================================ -->
+    <div class="page-content" id="page-range">
+        <div class="corp-card">
+            <div class="corp-card-header">
+                <div>
+                    <h5 class="corp-card-title" id="rangeTitle">⏱️ Time Range Analysis</h5>
+                    <p class="corp-card-subtitle" id="rangeSub">Compare any hour range within a day</p>
+                </div>
+            </div>
+
+            <div class="range-corp">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label" id="lblRangeFrom">From Hour</label>
+                        <select id="rangeFrom" class="form-select" onchange="calculateRange()"></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" id="lblRangeTo">To Hour</label>
+                        <select id="rangeTo" class="form-select" onchange="calculateRange()"></select>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-center" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px;">
+                            <span class="text-muted-sm" id="rangeResultLabel">Range Result:</span>
+                            <div id="rangeResult" style="color: var(--accent); font-weight: 700; margin-top: 4px;">Select a range above</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PAGE: EXPORT -->
+    <!-- ============================================ -->
+    <div class="page-content" id="page-export">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="corp-card text-center">
+                    <div class="kpi-icon green mx-auto mb-3" style="width: 60px; height: 60px; font-size: 28px;">📊</div>
+                    <h5 class="corp-card-title" id="exportExcelTitle">Export to Excel</h5>
+                    <p class="text-muted-sm" id="exportExcelSub">Download the day's data as a spreadsheet (.xlsx)</p>
+                    <button class="btn btn-success mt-2" onclick="exportToExcel()" id="btnExportExcel">Download Excel</button>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="corp-card text-center">
+                    <div class="kpi-icon blue mx-auto mb-3" style="width: 60px; height: 60px; font-size: 28px;">📄</div>
+                    <h5 class="corp-card-title" id="exportPdfTitle">Export to PDF</h5>
+                    <p class="text-muted-sm" id="exportPdfSub">Download a formatted PDF report for sharing</p>
+                    <button class="btn btn-danger mt-2" onclick="exportToPDF()" id="btnExportPDF">Download PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PAGE: DANGER ZONE -->
+    <!-- ============================================ -->
+    <div class="page-content" id="page-danger">
+        <div class="danger-corp">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="danger-title" id="dangerTitle">Danger Zone</div>
+                    <p class="text-muted-sm mb-0" id="dangerText">
+                        This will permanently delete all sales data from this browser. This action cannot be undone.
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-danger" onclick="openClearDataModal()" id="btnClearData">Clear All Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ============================================ -->
+<!-- MODALS -->
+<!-- ============================================ -->
+<div class="modal fade" id="saveSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-4">
+                <div style="font-size: 3rem; color: var(--success);">✓</div>
+                <p class="mt-3 mb-2 fw-bold" id="saveModalMessage">Data saved successfully for</p>
+                <span id="saveModalHour" style="font-size: 1.5rem; font-weight: 700; color: var(--accent); display: block; margin-top: 8px;">--:-- --</span>
+            </div>
+            <div class="modal-footer justify-content-center border-0 pt-0 pb-4">
+                <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal" id="saveModalOK">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- STORE EDIT MODAL -->
+<div class="modal fade store-edit-modal" id="storeEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="storeModalTitle">🏪 Edit Store Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label for="storeNameInput" class="form-label" id="lblStoreName">Store Name</label>
+                    <input type="text" id="storeNameInput" class="form-control" placeholder="e.g., Downtown Coffee Shop">
+                </div>
+                <div class="mb-3">
+                    <label for="storeLocationInput" class="form-label" id="lblStoreLocation">Location</label>
+                    <input type="text" id="storeLocationInput" class="form-control" placeholder="e.g., 123 Main St, New York">
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 pb-4 px-4">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnCancelStore">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveStoreInfo()" id="btnSaveStore">Save Store Info</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="clearDataModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body p-4 text-center">
+                <div style="font-size: 3rem; color: var(--danger);">⚠️</div>
+                <h4 class="mt-3 mb-2" id="clearDataTitle" style="color: var(--danger); font-weight: 700;">Warning</h4>
+                <p class="mb-3 text-muted-sm" id="clearDataMessage">This will permanently delete ALL sales data. Enter the password to confirm.</p>
+
+                <div class="mb-3">
+                    <label for="clearDataPassword" class="form-label" id="clearDataPasswordLabel">Password</label>
+                    <input type="password" id="clearDataPassword" class="form-control text-center" placeholder="Enter Password" onkeypress="handlePasswordKeyPress(event)">
+                    <div class="password-error" id="passwordError">Incorrect password. Please try again.</div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center border-0 pt-0 pb-4">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" id="btnCancelClear">Cancel</button>
+                <button type="button" class="btn btn-danger px-4" onclick="confirmClearData()" id="btnConfirmClear">Confirm Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // =========================================================
+    // TRANSLATIONS
+    // =========================================================
+    var translations = {
+        en: {
+            navEntry: "Data Entry", navDashboard: "Dashboard", navPrediction: "AI Prediction",
+            navHistory: "Historical", navRange: "Time Range", navExport: "Export", navDanger: "Danger Zone",
+            topbarEntry: "Data Entry", topbarEntrySub: "Enter hourly sales and guest data",
+            topbarDashboard: "Dashboard", topbarDashboardSub: "Executive overview of daily performance",
+            topbarPrediction: "AI Prediction", topbarPredictionSub: "Smart sales forecasting engine",
+            topbarHistory: "Historical Data", topbarHistorySub: "Range-based sales analysis",
+            topbarRange: "Time Range", topbarRangeSub: "Analyze specific hour windows",
+            topbarExport: "Export Reports", topbarExportSub: "Download data as Excel or PDF",
+            topbarDanger: "Danger Zone", topbarDangerSub: "Irreversible data operations",
+            entryCardTitle: "➕ Enter Hourly Data",
+            entryCardSub: "Add sales and guest count for a specific hour",
+            todayCardTitle: "📋 Entries for Selected Date",
+            todayCardSub: "Hourly breakdown of the chosen date",
+            lblDate: "Date", lblHour: "Select Hour", lblSales: "Sales Amount", lblGuests: "Guest Count",
+            btnSave: "Save Entry",
+            ltSalesLabel: "Running Sales", ltGuestsLabel: "Running TC", ltAvgLabel: "Running AC",
+            lblViewDate: "View Data For Date",
+            btnRefresh: "Refresh",
+            kpiSalesLabel: "Total Sales", kpiSalesSub: "For selected day",
+            kpiGuestsLabel: "Total Guests", kpiGuestsSub: "TC count",
+            kpiAvgLabel: "Avg Check", kpiAvgSub: "Per guest",
+            kpiForecastLabel: "Forecast", kpiForecastSub: "Next hour / day",
+            chartSalesTitle: "💵 Sales Share", chartGuestsTitle: "👥 Guest Share", chartTrendTitle: "📊 Peak Hours",
+            salesDoughnutLabel: "Sales", guestsDoughnutLabel: "Guests",
+            lblPredictionDate: "Prediction Based On Date",
+            predictionTitle: "AI Sales Prediction for Next Hour",
+            predictionTitleDay: "AI Projection for Full Day (Based on Trend)",
+            predictionProjectedDay: "Projected Full Day Sales",
+            predictionActualDay: "Actual",
+            confidenceLabel: "Confidence",
+            basedOnLabel: "Based on {n} hours",
+            confidenceLow: "Low", confidenceMedium: "Medium", confidenceHigh: "High",
+            predictionNeedData: "Enter at least 3 hours of data to enable prediction.",
+            predictionNeedMore: "Need more data for accurate prediction. Minimum 3 hours.",
+            predictionStable: "Sales trend is stable",
+            predictionRising: "Sales trend is rising",
+            predictionFalling: "Sales trend is falling",
+            predictionNextHour: "Expected Sales for {hour}:",
+            predExplainTitle: "📘 How This Works",
+            predExplainText: "The system uses linear regression to analyze the hourly sales trend and predict the next expected value. Confidence level increases as more hours of data become available.",
+            historyTitle: "📅 Historical Data Retrieval",
+            historySub: "Select a custom date range to analyze",
+            lblHistoryFrom: "From Date", lblHistoryTo: "To Date",
+            btnCalculateHistory: "Calculate Range", btnResetView: "Reset View",
+            btnQuickMonth: "This Month", btnQuickYear: "This Year",
+            btnQuickLast30: "Last 30 Days", btnQuickToday: "Today Only",
+            historyResultSalesLabel: "Total Sales", historyResultGuestsLabel: "Total Guests",
+            historyResultAvgLabel: "Avg Check", historyResultDaysLabel: "Days",
+            historyNoData: "No data found for this period.",
+            historyAlertFrom: "Please select a From Date.",
+            historyAlertTo: "Please select a To Date.",
+            historyAlertOrder: "From Date must be before To Date.",
+            rangeTitle: "⏱️ Time Range Analysis",
+            rangeSub: "Compare any hour range within a day",
+            lblRangeFrom: "From Hour", lblRangeTo: "To Hour",
+            rangeResultLabel: "Range Result:", rangePrompt: "Select a range above",
+            exportExcelTitle: "Export to Excel",
+            exportExcelSub: "Download the day's data as a spreadsheet (.xlsx)",
+            exportPdfTitle: "Export to PDF",
+            exportPdfSub: "Download a formatted PDF report for sharing",
+            btnExportExcel: "Download Excel", btnExportPDF: "Download PDF",
+            dangerTitle: "Danger Zone",
+            dangerText: "This will permanently delete all sales data from this browser. This action cannot be undone.",
+            btnClearData: "Clear All Data",
+            clearDataTitle: "Warning",
+            clearDataMessage: "This will permanently delete ALL sales data. Enter the password to confirm.",
+            clearDataPasswordLabel: "Password",
+            clearDataPasswordPlaceholder: "Enter Password",
+            passwordError: "Incorrect password. Please try again.",
+            btnCancelClear: "Cancel", btnConfirmClear: "Confirm Delete",
+            clearSuccess: "All data has been cleared successfully.",
+            saveSuccessPrefix: "Data saved successfully for",
+            saveModalOK: "OK",
+            sidebarFooter: "v2.0 Corporate Edition",
+            thHour: "Hour", thSales: "Sales", thGuests: "Guests", thAvg: "Avg Check",
+            noData: "No data for this date.",
+            alertInvalid: "Please fill all fields correctly.",
+            btnEditStore: "✏️ Edit Store Info",
+            storeModalTitle: "🏪 Edit Store Information",
+            lblStoreName: "Store Name",
+            lblStoreLocation: "Location",
+            btnCancelStore: "Cancel",
+            btnSaveStore: "Save Store Info",
+            storeNamePlaceholder: "e.g., Downtown Coffee Shop",
+            storeLocationPlaceholder: "e.g., 123 Main St, New York",
+            defaultStoreName: "My Store",
+            defaultStoreLocation: "Location not set"
+        },
+        hi: {
+            navEntry: "डेटा एंट्री", navDashboard: "डैशबोर्ड", navPrediction: "AI भविष्यवाणी",
+            navHistory: "ऐतिहासिक", navRange: "समय सीमा", navExport: "निर्यात", navDanger: "खतरा क्षेत्र",
+            topbarEntry: "डेटा एंट्री", topbarEntrySub: "प्रति घंटा बिक्री और अतिथि डेटा दर्ज करें",
+            topbarDashboard: "डैशबोर्ड", topbarDashboardSub: "दैनिक प्रदर्शन का कार्यकारी अवलोकन",
+            topbarPrediction: "AI भविष्यवाणी", topbarPredictionSub: "स्मार्ट बिक्री पूर्वानुमान",
+            topbarHistory: "ऐतिहासिक डेटा", topbarHistorySub: "रेंज-आधारित बिक्री विश्लेषण",
+            topbarRange: "समय सीमा", topbarRangeSub: "विशिष्ट घंटे विंडो का विश्लेषण",
+            topbarExport: "रिपोर्ट निर्यात", topbarExportSub: "डेटा को Excel या PDF के रूप में डाउनलोड करें",
+            topbarDanger: "खतरा क्षेत्र", topbarDangerSub: "अपरिवर्तनीय डेटा संचालन",
+            entryCardTitle: "➕ प्रति घंटा डेटा दर्ज करें",
+            entryCardSub: "किसी विशिष्ट घंटे के लिए बिक्री और अतिथि संख्या जोड़ें",
+            todayCardTitle: "📋 चयनित तारीख की प्रविष्टियाँ",
+            todayCardSub: "चुनी गई तारीख का प्रति घंटा विवरण",
+            lblDate: "तारीख", lblHour: "घंटा चुनें", lblSales: "बिक्री राशि", lblGuests: "अतिथि संख्या",
+            btnSave: "प्रविष्टि सहेजें",
+            ltSalesLabel: "चालू बिक्री", ltGuestsLabel: "चालू TC", ltAvgLabel: "चालू AC",
+            lblViewDate: "इस तारीख का डेटा देखें",
+            btnRefresh: "रिफ्रेश",
+            kpiSalesLabel: "कुल बिक्री", kpiSalesSub: "चयनित दिन के लिए",
+            kpiGuestsLabel: "कुल अतिथि", kpiGuestsSub: "TC गणना",
+            kpiAvgLabel: "औसत चेक", kpiAvgSub: "प्रति अतिथि",
+            kpiForecastLabel: "पूर्वानुमान", kpiForecastSub: "अगला घंटा / दिन",
+            chartSalesTitle: "💵 बिक्री हिस्सा", chartGuestsTitle: "👥 अतिथि हिस्सा", chartTrendTitle: "📊 पीक घंटे",
+            salesDoughnutLabel: "बिक्री", guestsDoughnutLabel: "अतिथि",
+            lblPredictionDate: "भविष्यवाणी तारीख",
+            predictionTitle: "अगले घंटे के लिए AI बिक्री भविष्यवाणी",
+            predictionTitleDay: "पूर्ण दिन के लिए AI अनुमान",
+            predictionProjectedDay: "अनुमानित पूर्ण दिन बिक्री",
+            predictionActualDay: "वास्तविक",
+            confidenceLabel: "विश्वास",
+            basedOnLabel: "{n} घंटों के आधार पर",
+            confidenceLow: "कम", confidenceMedium: "मध्यम", confidenceHigh: "उच्च",
+            predictionNeedData: "पूर्वानुमान के लिए कम से कम 3 घंटे का डेटा दर्ज करें।",
+            predictionNeedMore: "सटीक पूर्वानुमान के लिए और डेटा चाहिए। न्यूनतम 3 घंटे।",
+            predictionStable: "बिक्री का रुझान स्थिर है",
+            predictionRising: "बिक्री का रुझान बढ़ रहा है",
+            predictionFalling: "बिक्री का रुझान गिर रहा है",
+            predictionNextHour: "{hour} के लिए अपेक्षित बिक्री:",
+            predExplainTitle: "📘 यह कैसे काम करता है",
+            predExplainText: "सिस्टम प्रति घंटा बिक्री रुझान का विश्लेषण करने और अगले अपेक्षित मूल्य की भविष्यवाणी करने के लिए रैखिक प्रतिगमन का उपयोग करता है।",
+            historyTitle: "📅 ऐतिहासिक डेटा पुनर्प्राप्ति",
+            historySub: "विश्लेषण के लिए कस्टम तारीख सीमा चुनें",
+            lblHistoryFrom: "से तारीख", lblHistoryTo: "तक तारीख",
+            btnCalculateHistory: "रेंज की गणना करें", btnResetView: "दृश्य रीसेट करें",
+            btnQuickMonth: "इस महीने", btnQuickYear: "इस वर्ष",
+            btnQuickLast30: "पिछले 30 दिन", btnQuickToday: "केवल आज",
+            historyResultSalesLabel: "कुल बिक्री", historyResultGuestsLabel: "कुल अतिथि",
+            historyResultAvgLabel: "औसत चेक", historyResultDaysLabel: "दिन",
+            historyNoData: "इस अवधि के लिए कोई डेटा नहीं मिला।",
+            historyAlertFrom: "कृपया एक आरंभ तिथि चुनें।",
+            historyAlertTo: "कृपया एक अंतिम तिथि चुनें।",
+            historyAlertOrder: "आरंभ तिथि अंतिम तिथि से पहले होनी चाहिए।",
+            rangeTitle: "⏱️ समय सीमा विश्लेषण",
+            rangeSub: "एक दिन के भीतर किसी भी घंटे की सीमा की तुलना करें",
+            lblRangeFrom: "से घंटा", lblRangeTo: "तक घंटा",
+            rangeResultLabel: "सीमा परिणाम:", rangePrompt: "ऊपर एक सीमा चुनें",
+            exportExcelTitle: "Excel में निर्यात करें",
+            exportExcelSub: "दिन का डेटा स्प्रेडशीट के रूप में डाउनलोड करें (.xlsx)",
+            exportPdfTitle: "PDF में निर्यात करें",
+            exportPdfSub: "साझा करने के लिए एक स्वरूपित PDF रिपोर्ट डाउनलोड करें",
+            btnExportExcel: "Excel डाउनलोड करें", btnExportPDF: "PDF डाउनलोड करें",
+            dangerTitle: "खतरा क्षेत्र",
+            dangerText: "यह इस ब्राउज़र से सभी बिक्री डेटा को स्थायी रूप से हटा देगा। यह क्रिया पूर्ववत नहीं की जा सकती।",
+            btnClearData: "सभी डेटा साफ़ करें",
+            clearDataTitle: "चेतावनी",
+            clearDataMessage: "यह सभी बिक्री डेटा को स्थायी रूप से हटा देगा। पुष्टि करने के लिए पासवर्ड दर्ज करें।",
+            clearDataPasswordLabel: "पासवर्ड",
+            clearDataPasswordPlaceholder: "पासवर्ड दर्ज करें",
+            passwordError: "गलत पासवर्ड। कृपया पुन: प्रयास करें।",
+            btnCancelClear: "रद्द करें", btnConfirmClear: "हटाने की पुष्टि करें",
+            clearSuccess: "सभी डेटा सफलतापूर्वक साफ़ कर दिया गया है।",
+            saveSuccessPrefix: "डेटा सफलतापूर्वक सहेजा गया",
+            saveModalOK: "ठीक है",
+            sidebarFooter: "v2.0 कॉर्पोरेट संस्करण",
+            thHour: "घंटा", thSales: "बिक्री", thGuests: "अतिथि", thAvg: "औसत चेक",
+            noData: "इस तारीख के लिए कोई डेटा नहीं है।",
+            alertInvalid: "कृपया सभी फ़ील्ड सही ढंग से भरें।",
+            btnEditStore: "✏️ स्टोर जानकारी संपादित करें",
+            storeModalTitle: "🏪 स्टोर जानकारी संपादित करें",
+            lblStoreName: "स्टोर का नाम",
+            lblStoreLocation: "स्थान",
+            btnCancelStore: "रद्द करें",
+            btnSaveStore: "स्टोर जानकारी सहेजें",
+            storeNamePlaceholder: "जैसे, डाउनटाउन कॉफी शॉप",
+            storeLocationPlaceholder: "जैसे, 123 मेन स्ट्रीट, नई दिल्ली",
+            defaultStoreName: "मेरा स्टोर",
+            defaultStoreLocation: "स्थान सेट नहीं है"
+        },
+        ar: {
+            navEntry: "إدخال البيانات", navDashboard: "لوحة التحكم", navPrediction: "توقع AI",
+            navHistory: "السجل التاريخي", navRange: "النطاق الزمني", navExport: "تصدير", navDanger: "منطقة الخطر",
+            topbarEntry: "إدخال البيانات", topbarEntrySub: "أدخل المبيعات والضيوف كل ساعة",
+            topbarDashboard: "لوحة التحكم", topbarDashboardSub: "نظرة عامة تنفيذية على الأداء اليومي",
+            topbarPrediction: "توقع AI", topbarPredictionSub: "محرك التنبؤ الذكي بالمبيعات",
+            topbarHistory: "البيانات التاريخية", topbarHistorySub: "تحليل المبيعات حسب النطاق",
+            topbarRange: "النطاق الزمني", topbarRangeSub: "تحليل نوافذ ساعات محددة",
+            topbarExport: "تصدير التقارير", topbarExportSub: "تنزيل البيانات بصيغة Excel أو PDF",
+            topbarDanger: "منطقة الخطر", topbarDangerSub: "عمليات بيانات لا رجعة فيها",
+            entryCardTitle: "➕ أدخل البيانات كل ساعة",
+            entryCardSub: "أضف المبيعات وعدد الضيوف لساعة محددة",
+            todayCardTitle: "📋 إدخالات التاريخ المحدد",
+            todayCardSub: "تفصيل كل ساعة للتاريخ المختار",
+            lblDate: "التاريخ", lblHour: "اختر الساعة", lblSales: "مبلغ المبيعات", lblGuests: "عدد الضيوف",
+            btnSave: "حفظ الإدخال",
+            ltSalesLabel: "المبيعات الجارية", ltGuestsLabel: "TC الجاري", ltAvgLabel: "AC الجاري",
+            lblViewDate: "عرض البيانات لتاريخ",
+            btnRefresh: "تحديث",
+            kpiSalesLabel: "إجمالي المبيعات", kpiSalesSub: "لليوم المحدد",
+            kpiGuestsLabel: "إجمالي الضيوف", kpiGuestsSub: "عدد TC",
+            kpiAvgLabel: "متوسط الفاتورة", kpiAvgSub: "لكل ضيف",
+            kpiForecastLabel: "التوقعات", kpiForecastSub: "الساعة / اليوم التالي",
+            chartSalesTitle: "💵 حصة المبيعات", chartGuestsTitle: "👥 حصة الضيوف", chartTrendTitle: "📊 ساعات الذروة",
+            salesDoughnutLabel: "المبيعات", guestsDoughnutLabel: "الضيوف",
+            lblPredictionDate: "تاريخ أساس التوقع",
+            predictionTitle: "توقع المبيعات للساعة القادمة",
+            predictionTitleDay: "توقع اليوم الكامل",
+            predictionProjectedDay: "المبيعات المتوقعة لليوم الكامل",
+            predictionActualDay: "الفعلي",
+            confidenceLabel: "الثقة",
+            basedOnLabel: "بناءً على {n} ساعات",
+            confidenceLow: "منخفض", confidenceMedium: "متوسط", confidenceHigh: "عالي",
+            predictionNeedData: "أدخل 3 ساعات على الأقل لتفعيل التوقع.",
+            predictionNeedMore: "تحتاج إلى مزيد من البيانات. 3 ساعات كحد أدنى.",
+            predictionStable: "اتجاه المبيعات مستقر",
+            predictionRising: "اتجاه المبيعات يرتفع",
+            predictionFalling: "اتجاه المبيعات ينخفض",
+            predictionNextHour: "المبيعات المتوقعة لـ {hour}:",
+            predExplainTitle: "📘 كيف يعمل هذا",
+            predExplainText: "يستخدم النظام الانحدار الخطي لتحليل اتجاه المبيعات كل ساعة والتنبؤ بالقيمة التالية.",
+            historyTitle: "📅 استرجاع البيانات التاريخية",
+            historySub: "اختر نطاقًا زمنيًا مخصصًا للتحليل",
+            lblHistoryFrom: "من تاريخ", lblHistoryTo: "إلى تاريخ",
+            btnCalculateHistory: "احسب النطاق", btnResetView: "إعادة تعيين",
+            btnQuickMonth: "هذا الشهر", btnQuickYear: "هذا العام",
+            btnQuickLast30: "آخر 30 يومًا", btnQuickToday: "اليوم فقط",
+            historyResultSalesLabel: "إجمالي المبيعات", historyResultGuestsLabel: "إجمالي الضيوف",
+            historyResultAvgLabel: "متوسط الفاتورة", historyResultDaysLabel: "الأيام",
+            historyNoData: "لا توجد بيانات لهذه الفترة.",
+            historyAlertFrom: "يرجى تحديد تاريخ البدء.",
+            historyAlertTo: "يرجى تحديد تاريخ الانتهاء.",
+            historyAlertOrder: "يجب أن يكون تاريخ البدء قبل تاريخ الانتهاء.",
+            rangeTitle: "⏱️ تحليل النطاق الزمني",
+            rangeSub: "قارن أي نطاق ساعات خلال اليوم",
+            lblRangeFrom: "من الساعة", lblRangeTo: "إلى الساعة",
+            rangeResultLabel: "نتيجة النطاق:", rangePrompt: "اختر نطاقًا أعلاه",
+            exportExcelTitle: "تصدير إلى Excel",
+            exportExcelSub: "تنزيل بيانات اليوم كجدول (.xlsx)",
+            exportPdfTitle: "تصدير إلى PDF",
+            exportPdfSub: "تنزيل تقرير PDF منسق للمشاركة",
+            btnExportExcel: "تنزيل Excel", btnExportPDF: "تنزيل PDF",
+            dangerTitle: "منطقة الخطر",
+            dangerText: "سيؤدي هذا إلى حذف جميع بيانات المبيعات نهائيًا من هذا المتصفح.",
+            btnClearData: "مسح جميع البيانات",
+            clearDataTitle: "تحذير",
+            clearDataMessage: "سيؤدي هذا إلى حذف جميع بيانات المبيعات نهائيًا. أدخل كلمة المرور للتأكيد.",
+            clearDataPasswordLabel: "كلمة المرور",
+            clearDataPasswordPlaceholder: "أدخل كلمة المرور",
+            passwordError: "كلمة مرور غير صحيحة. حاول مرة أخرى.",
+            btnCancelClear: "إلغاء", btnConfirmClear: "تأكيد الحذف",
+            clearSuccess: "تم مسح جميع البيانات بنجاح.",
+            saveSuccessPrefix: "تم حفظ البيانات بنجاح لـ",
+            saveModalOK: "حسناً",
+            sidebarFooter: "v2.0 إصدار الشركة",
+            thHour: "الساعة", thSales: "المبيعات", thGuests: "الضيوف", thAvg: "متوسط الفاتورة",
+            noData: "لا توجد بيانات لهذا التاريخ.",
+            alertInvalid: "يرجى ملء جميع الحقول بشكل صحيح.",
+            btnEditStore: "✏️ تعديل معلومات المتجر",
+            storeModalTitle: "🏪 تعديل معلومات المتجر",
+            lblStoreName: "اسم المتجر",
+            lblStoreLocation: "الموقع",
+            btnCancelStore: "إلغاء",
+            btnSaveStore: "حفظ معلومات المتجر",
+            storeNamePlaceholder: "مثال: مقهى وسط المدينة",
+            storeLocationPlaceholder: "مثال: 123 شارع الرئيسي، دبي",
+            defaultStoreName: "متجري",
+            defaultStoreLocation: "الموقع غير محدد"
+        }
+    };
+
+    var currentLang = "en";
+    var salesDoughnutChart = null;
+    var guestsDoughnutChart = null;
+    var hourlyBarChart = null;
+    var clockInterval = null;
+    var saveModalInstance = null;
+    var clearModalInstance = null;
+    var storeModalInstance = null;
+    var CLEAR_PASSWORD = "000000";
+    var currentPage = "page-entry";
+
+    // INIT
+    document.addEventListener("DOMContentLoaded", function() {
+        var savedTheme = localStorage.getItem("salesTrackerTheme") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        document.getElementById("themeBtn").innerText = savedTheme === "dark" ? "☀️" : "🌙";
+
+        var today = new Date();
+        var todayStr = today.toISOString().split("T")[0];
+        var firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split("T")[0];
+
+        document.getElementById("inputDate").value = todayStr;
+        document.getElementById("viewDate").value = todayStr;
+        document.getElementById("predictionDate").value = todayStr;
+        document.getElementById("historyFromDate").value = firstDayOfMonth;
+        document.getElementById("historyToDate").value = todayStr;
+
+        populateHourDropdown("inputHour");
+        populateHourDropdown("rangeFrom");
+        populateHourDropdown("rangeTo");
+        document.getElementById("rangeFrom").value = 8;
+        document.getElementById("rangeTo").value = 17;
+
+        saveModalInstance = new bootstrap.Modal(document.getElementById("saveSuccessModal"));
+        clearModalInstance = new bootstrap.Modal(document.getElementById("clearDataModal"));
+        storeModalInstance = new bootstrap.Modal(document.getElementById("storeEditModal"));
+
+        loadStoreInfo();
+
+        startClock();
+        changeLanguage();
+        renderDashboard();
+        updateLiveTotals();
+        updatePrediction();
+        renderEntryTable();
+    });
+
+    // =========================================================
+    // STORE INFO
+    // =========================================================
+    function loadStoreInfo() {
+        var name = localStorage.getItem("salesTrackerStoreName") || "";
+        var location = localStorage.getItem("salesTrackerStoreLocation") || "";
+        var t = translations[currentLang];
+
+        document.getElementById("storeNameDisplay").innerText = name || t.defaultStoreName;
+        document.getElementById("storeLocationDisplay").innerText = location || t.defaultStoreLocation;
+        document.getElementById("storeNameInput").value = name;
+        document.getElementById("storeLocationInput").value = location;
+    }
+
+    function openStoreEditModal() {
+        var name = localStorage.getItem("salesTrackerStoreName") || "";
+        var location = localStorage.getItem("salesTrackerStoreLocation") || "";
+        document.getElementById("storeNameInput").value = name;
+        document.getElementById("storeLocationInput").value = location;
+        storeModalInstance.show();
+        setTimeout(function() {
+            document.getElementById("storeNameInput").focus();
+        }, 400);
+    }
+
+    function saveStoreInfo() {
+        var name = document.getElementById("storeNameInput").value.trim();
+        var location = document.getElementById("storeLocationInput").value.trim();
+
+        localStorage.setItem("salesTrackerStoreName", name);
+        localStorage.setItem("salesTrackerStoreLocation", location);
+
+        var t = translations[currentLang];
+        document.getElementById("storeNameDisplay").innerText = name || t.defaultStoreName;
+        document.getElementById("storeLocationDisplay").innerText = location || t.defaultStoreLocation;
+
+        storeModalInstance.hide();
+    }
+
+    // NAVIGATION
+    function navigateTo(pageId, element) {
+        currentPage = pageId;
+        var pages = document.querySelectorAll(".page-content");
+        for (var i = 0; i < pages.length; i++) pages[i].classList.remove("active");
+        document.getElementById(pageId).classList.add("active");
+
+        var navItems = document.querySelectorAll(".nav-item");
+        for (var j = 0; j < navItems.length; j++) navItems[j].classList.remove("active");
+        if (element) element.classList.add("active");
+
+        updateTopbar(pageId);
+
+        if (pageId === "page-dashboard") renderDashboard();
+        if (pageId === "page-prediction") updatePrediction();
+        if (pageId === "page-entry") renderEntryTable();
+
+        if (window.innerWidth <= 768) {
+            document.getElementById("sidebar").classList.remove("mobile-open");
+        }
+    }
+
+    function updateTopbar(pageId) {
+        var t = translations[currentLang];
+        var titleEl = document.getElementById("topbarTitle");
+        var subEl = document.getElementById("topbarSubtitle");
+
+        var map = {
+            "page-entry": ["topbarEntry", "topbarEntrySub"],
+            "page-dashboard": ["topbarDashboard", "topbarDashboardSub"],
+            "page-prediction": ["topbarPrediction", "topbarPredictionSub"],
+            "page-history": ["topbarHistory", "topbarHistorySub"],
+            "page-range": ["topbarRange", "topbarRangeSub"],
+            "page-export": ["topbarExport", "topbarExportSub"],
+            "page-danger": ["topbarDanger", "topbarDangerSub"]
+        };
+
+        if (map[pageId]) {
+            titleEl.innerText = t[map[pageId][0]];
+            subEl.innerText = t[map[pageId][1]];
+        }
+    }
+
+    function toggleSidebar() {
+        var sidebar = document.getElementById("sidebar");
+        var main = document.getElementById("mainContent");
+        if (window.innerWidth <= 768) {
+            sidebar.classList.toggle("mobile-open");
+        } else {
+            sidebar.classList.toggle("collapsed");
+            main.classList.toggle("expanded");
+        }
+    }
+
+    // CLOCK
+    function startClock() {
+        if (clockInterval !== null) clearInterval(clockInterval);
+        updateClock();
+        clockInterval = setInterval(updateClock, 1000);
+    }
+
+    function updateClock() {
+        var now = new Date();
+        var hours = now.getHours();
+        var minutes = String(now.getMinutes()).padStart(2, "0");
+        var seconds = String(now.getSeconds()).padStart(2, "0");
+        var ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12;
+        if (hours === 0) hours = 12;
+        var displayHours = String(hours).padStart(2, "0");
+
+        document.getElementById("liveTime").innerText = displayHours + ":" + minutes + ":" + seconds + " " + ampm;
+
+        var dateOptions = { weekday: "short", year: "numeric", month: "short", day: "numeric" };
+        var locale = "en-US";
+        if (currentLang === "hi") locale = "hi-IN";
+        if (currentLang === "ar") locale = "ar-SA";
+        document.getElementById("liveDate").innerText = now.toLocaleDateString(locale, dateOptions);
+    }
+
+    // THEME
+    function toggleTheme() {
+        var current = document.documentElement.getAttribute("data-theme");
+        var next = current === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("salesTrackerTheme", next);
+        document.getElementById("themeBtn").innerText = next === "dark" ? "☀️" : "🌙";
+        setTimeout(function() { renderDashboard(); updatePrediction(); }, 50);
+    }
+
+    function getChartColors() {
+        var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        return { text: isDark ? "#8b96a8" : "#8492a6", grid: isDark ? "#2a3444" : "#e4e8ef" };
+    }
+
+    // HOUR DROPDOWN
+    function populateHourDropdown(elementId) {
+        var select = document.getElementById(elementId);
+        select.innerHTML = "";
+        for (var i = 0; i < 24; i++) {
+            var option = document.createElement("option");
+            option.value = i;
+            var displayHour = i % 12;
+            if (displayHour === 0) displayHour = 12;
+            var ampm = i < 12 ? "AM" : "PM";
+            option.text = (displayHour < 10 ? "0" : "") + displayHour + ":00 " + ampm;
+            select.appendChild(option);
+        }
+    }
+
+    // LANGUAGE
+    function changeLanguage() {
+        currentLang = document.getElementById("languageSelector").value;
+        var t = translations[currentLang];
+
+        document.getElementById("navTextEntry").innerText = t.navEntry;
+        document.getElementById("navTextDashboard").innerText = t.navDashboard;
+        document.getElementById("navTextPrediction").innerText = t.navPrediction;
+        document.getElementById("navTextHistory").innerText = t.navHistory;
+        document.getElementById("navTextRange").innerText = t.navRange;
+        document.getElementById("navTextExport").innerText = t.navExport;
+        document.getElementById("navTextDanger").innerText = t.navDanger;
+        document.getElementById("sidebarFooterText").innerText = t.sidebarFooter;
+
+        document.getElementById("entryCardTitle").innerText = t.entryCardTitle;
+        document.getElementById("entryCardSub").innerText = t.entryCardSub;
+        document.getElementById("todayCardTitle").innerText = t.todayCardTitle;
+        document.getElementById("todayCardSub").innerText = t.todayCardSub;
+        document.getElementById("lblDate").innerText = t.lblDate;
+        document.getElementById("lblHour").innerText = t.lblHour;
+        document.getElementById("lblSales").innerText = t.lblSales;
+        document.getElementById("lblGuests").innerText = t.lblGuests;
+        document.getElementById("btnSave").innerText = t.btnSave;
+        document.getElementById("ltSalesLabel").innerText = t.ltSalesLabel;
+        document.getElementById("ltGuestsLabel").innerText = t.ltGuestsLabel;
+        document.getElementById("ltAvgLabel").innerText = t.ltAvgLabel;
+
+        document.getElementById("lblViewDate").innerText = t.lblViewDate;
+        document.getElementById("btnRefresh").innerText = t.btnRefresh;
+        document.getElementById("kpiSalesLabel").innerText = t.kpiSalesLabel;
+        document.getElementById("kpiSalesSub").innerText = t.kpiSalesSub;
+        document.getElementById("kpiGuestsLabel").innerText = t.kpiGuestsLabel;
+        document.getElementById("kpiGuestsSub").innerText = t.kpiGuestsSub;
+        document.getElementById("kpiAvgLabel").innerText = t.kpiAvgLabel;
+        document.getElementById("kpiAvgSub").innerText = t.kpiAvgSub;
+        document.getElementById("kpiForecastLabel").innerText = t.kpiForecastLabel;
+        document.getElementById("kpiForecastSub").innerText = t.kpiForecastSub;
+        document.getElementById("chartSalesTitle").innerText = t.chartSalesTitle;
+        document.getElementById("chartGuestsTitle").innerText = t.chartGuestsTitle;
+        document.getElementById("chartTrendTitle").innerText = t.chartTrendTitle;
+        document.getElementById("salesDoughnutLabel").innerText = t.salesDoughnutLabel;
+        document.getElementById("guestsDoughnutLabel").innerText = t.guestsDoughnutLabel;
+
+        document.getElementById("lblPredictionDate").innerText = t.lblPredictionDate;
+        document.getElementById("predictionTitle").innerText = t.predictionTitle;
+        document.getElementById("confidenceLabel").innerText = t.confidenceLabel;
+        document.getElementById("predExplainTitle").innerText = t.predExplainTitle;
+        document.getElementById("predExplainText").innerText = t.predExplainText;
+
+        document.getElementById("historyTitle").innerText = t.historyTitle;
+        document.getElementById("historySub").innerText = t.historySub;
+        document.getElementById("lblHistoryFrom").innerText = t.lblHistoryFrom;
+        document.getElementById("lblHistoryTo").innerText = t.lblHistoryTo;
+        document.getElementById("btnCalculateHistory").innerText = t.btnCalculateHistory;
+        document.getElementById("btnResetView").innerText = t.btnResetView;
+        document.getElementById("btnQuickMonth").innerText = t.btnQuickMonth;
+        document.getElementById("btnQuickYear").innerText = t.btnQuickYear;
+        document.getElementById("btnQuickLast30").innerText = t.btnQuickLast30;
+        document.getElementById("btnQuickToday").innerText = t.btnQuickToday;
+        document.getElementById("historyResultSalesLabel").innerText = t.historyResultSalesLabel;
+        document.getElementById("historyResultGuestsLabel").innerText = t.historyResultGuestsLabel;
+        document.getElementById("historyResultAvgLabel").innerText = t.historyResultAvgLabel;
+        document.getElementById("historyResultDaysLabel").innerText = t.historyResultDaysLabel;
+
+        document.getElementById("rangeTitle").innerText = t.rangeTitle;
+        document.getElementById("rangeSub").innerText = t.rangeSub;
+        document.getElementById("lblRangeFrom").innerText = t.lblRangeFrom;
+        document.getElementById("lblRangeTo").innerText = t.lblRangeTo;
+        document.getElementById("rangeResultLabel").innerText = t.rangeResultLabel;
+
+        document.getElementById("exportExcelTitle").innerText = t.exportExcelTitle;
+        document.getElementById("exportExcelSub").innerText = t.exportExcelSub;
+        document.getElementById("exportPdfTitle").innerText = t.exportPdfTitle;
+        document.getElementById("exportPdfSub").innerText = t.exportPdfSub;
+        document.getElementById("btnExportExcel").innerText = t.btnExportExcel;
+        document.getElementById("btnExportPDF").innerText = t.btnExportPDF;
+
+        document.getElementById("dangerTitle").innerText = t.dangerTitle;
+        document.getElementById("dangerText").innerText = t.dangerText;
+        document.getElementById("btnClearData").innerText = t.btnClearData;
+        document.getElementById("clearDataTitle").innerText = t.clearDataTitle;
+        document.getElementById("clearDataMessage").innerText = t.clearDataMessage;
+        document.getElementById("clearDataPasswordLabel").innerText = t.clearDataPasswordLabel;
+        document.getElementById("clearDataPassword").placeholder = t.clearDataPasswordPlaceholder;
+        document.getElementById("passwordError").innerText = t.passwordError;
+        document.getElementById("btnCancelClear").innerText = t.btnCancelClear;
+        document.getElementById("btnConfirmClear").innerText = t.btnConfirmClear;
+
+        document.getElementById("thHour").innerText = t.thHour;
+        document.getElementById("thSales").innerText = t.thSales;
+        document.getElementById("thGuests").innerText = t.thGuests;
+        document.getElementById("thAvg").innerText = t.thAvg;
+
+        document.getElementById("saveModalMessage").innerText = t.saveSuccessPrefix;
+        document.getElementById("saveModalOK").innerText = t.saveModalOK;
+
+        document.getElementById("btnEditStore").innerText = t.btnEditStore;
+        document.getElementById("storeModalTitle").innerText = t.storeModalTitle;
+        document.getElementById("lblStoreName").innerText = t.lblStoreName;
+        document.getElementById("lblStoreLocation").innerText = t.lblStoreLocation;
+        document.getElementById("btnCancelStore").innerText = t.btnCancelStore;
+        document.getElementById("btnSaveStore").innerText = t.btnSaveStore;
+        document.getElementById("storeNameInput").placeholder = t.storeNamePlaceholder;
+        document.getElementById("storeLocationInput").placeholder = t.storeLocationPlaceholder;
+
+        if (currentLang === "ar") {
+            document.documentElement.setAttribute("dir", "rtl");
+        } else {
+            document.documentElement.setAttribute("dir", "ltr");
+        }
+
+        loadStoreInfo();
+        updateClock();
+        updateTopbar(currentPage);
+        renderDashboard();
+        updatePrediction();
+        renderEntryTable();
+    }
+
+    // DATA
+    function getData() {
+        var data = localStorage.getItem("salesTrackerData");
+        if (data) return JSON.parse(data);
+        return {};
+    }
+
+    function saveData() {
+        var date = document.getElementById("inputDate").value;
+        var hour = parseInt(document.getElementById("inputHour").value);
+        var sales = parseFloat(document.getElementById("inputSales").value);
+        var guests = parseInt(document.getElementById("inputGuests").value);
+
+        if (!date || isNaN(hour) || isNaN(sales) || isNaN(guests)) {
+            alert(translations[currentLang].alertInvalid);
+            return;
+        }
+
+        var allData = getData();
+        if (!allData[date]) allData[date] = {};
+        allData[date][hour] = { sales: sales, guests: guests };
+        localStorage.setItem("salesTrackerData", JSON.stringify(allData));
+
+        document.getElementById("saveModalHour").innerText = formatHour12(hour);
+        playSaveSound();
+        saveModalInstance.show();
+        setTimeout(function() { saveModalInstance.hide(); }, 2200);
+
+        document.getElementById("inputHour").selectedIndex = 0;
+        document.getElementById("inputSales").value = "";
+        document.getElementById("inputGuests").value = "";
+
+        document.getElementById("viewDate").value = date;
+        document.getElementById("predictionDate").value = date;
+
+        updateLiveTotals();
+        renderEntryTable();
+        renderDashboard();
+        updatePrediction();
+    }
+
+    function playSaveSound() {
+        try {
+            var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            function beep(freq, start, dur) {
+                var osc = audioCtx.createOscillator();
+                var gain = audioCtx.createGain();
+                osc.type = "sine";
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.25, start);
+                gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(start);
+                osc.stop(start + dur);
+            }
+            var now = audioCtx.currentTime;
+            beep(880, now, 0.15);
+            beep(1320, now + 0.15, 0.2);
+        } catch (e) { console.log("Audio error"); }
+    }
+
+    function updateLiveTotals() {
+        var inputDate = document.getElementById("inputDate").value;
+        if (!inputDate) return;
+        var allData = getData();
+        var dayData = allData[inputDate] || {};
+        var totalSales = 0, totalGuests = 0;
+        for (var key in dayData) {
+            if (dayData.hasOwnProperty(key)) {
+                totalSales += dayData[key].sales;
+                totalGuests += dayData[key].guests;
+            }
+        }
+        var avgCheck = totalGuests > 0 ? (totalSales / totalGuests).toFixed(2) : 0;
+        document.getElementById("liveTotalSales").innerText = totalSales.toFixed(2);
+        document.getElementById("liveTotalGuests").innerText = totalGuests;
+        document.getElementById("liveTotalAvg").innerText = avgCheck;
+    }
+
+    function renderEntryTable() {
+        var inputDate = document.getElementById("inputDate").value;
+        var allData = getData();
+        var dayData = allData[inputDate] || {};
+        var sortedHours = Object.keys(dayData).sort(function(a, b) { return a - b; });
+        var tbody = document.getElementById("dataTableBody");
+        tbody.innerHTML = "";
+
+        if (sortedHours.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='4' class='no-data-cell'>" + translations[currentLang].noData + "</td></tr>";
+            return;
+        }
+
+        for (var i = 0; i < sortedHours.length; i++) {
+            var hour = sortedHours[i];
+            var entry = dayData[hour];
+            var avg = entry.guests > 0 ? (entry.sales / entry.guests).toFixed(2) : 0;
+            var row = "<tr>";
+            row += "<td>" + formatHour12(parseInt(hour)) + "</td>";
+            row += "<td>" + entry.sales.toFixed(2) + "</td>";
+            row += "<td>" + entry.guests + "</td>";
+            row += "<td>" + avg + "</td>";
+            row += "</tr>";
+            tbody.innerHTML += row;
+        }
+    }
+
+    function formatHour12(hour24) {
+        var displayHour = hour24 % 12;
+        if (displayHour === 0) displayHour = 12;
+        var ampm = hour24 >= 12 ? "PM" : "AM";
+        var result = displayHour + ":00 " + ampm;
+        if (displayHour < 10) result = "0" + result;
+        return result;
+    }
+
+    // DASHBOARD
+    function renderDashboard() {
+        var viewDate = document.getElementById("viewDate").value;
+        if (!viewDate) return;
+
+        var allData = getData();
+        var dayData = allData[viewDate] || {};
+
+        var totalSales = 0, totalGuests = 0;
+        var sortedHours = Object.keys(dayData).sort(function(a, b) { return a - b; });
+        var labels = [], salesArr = [], guestsArr = [];
+
+        for (var i = 0; i < sortedHours.length; i++) {
+            var entry = dayData[sortedHours[i]];
+            totalSales += entry.sales;
+            totalGuests += entry.guests;
+            labels.push(formatHour12(parseInt(sortedHours[i])));
+            salesArr.push(entry.sales);
+            guestsArr.push(entry.guests);
+        }
+
+        var avg = totalGuests > 0 ? (totalSales / totalGuests).toFixed(2) : 0;
+        document.getElementById("valTotalSales").innerText = totalSales.toFixed(0);
+        document.getElementById("valTotalGuests").innerText = totalGuests;
+        document.getElementById("valAvgCheck").innerText = avg;
+
+        var nextHourPred = 0, nextDayPred = 0;
+        if (sortedHours.length >= 2) {
+            var last = sortedHours[sortedHours.length - 1];
+            var prev = sortedHours[sortedHours.length - 2];
+            nextHourPred = (dayData[last].sales + dayData[prev].sales) / 2;
+        } else if (sortedHours.length === 1) {
+            nextHourPred = dayData[sortedHours[0]].sales;
+        }
+        var dates = Object.keys(allData).sort().reverse();
+        var idx = dates.indexOf(viewDate);
+        var last3 = [];
+        if (idx !== -1) {
+            for (var k = 1; k <= 3; k++) {
+                if (dates[idx + k]) {
+                    var dayTot = 0;
+                    for (var hk in allData[dates[idx + k]]) dayTot += allData[dates[idx + k]][hk].sales;
+                    last3.push(dayTot);
+                }
+            }
+        }
+        if (last3.length > 0) {
+            var sum3 = 0;
+            for (var m = 0; m < last3.length; m++) sum3 += last3[m];
+            nextDayPred = sum3 / last3.length;
+        }
+        document.getElementById("valForecast").innerText = (nextHourPred > 0 ? nextHourPred.toFixed(0) : "-") + " / " + (nextDayPred > 0 ? nextDayPred.toFixed(0) : "-");
+
+        document.getElementById("salesDoughnutCenter").innerText = totalSales.toFixed(0);
+        document.getElementById("guestsDoughnutCenter").innerText = totalGuests;
+
+        renderDoughnutChart("salesDoughnut", labels, salesArr);
+        renderDoughnutChart("guestsDoughnut", labels, guestsArr);
+        renderHourlyBar(labels, salesArr);
+        calculateRange();
+    }
+
+    function renderDoughnutChart(canvasId, labels, data) {
+        var ctx = document.getElementById(canvasId).getContext("2d");
+        var existing = Chart.getChart(ctx.canvas);
+        if (existing) existing.destroy();
+        if (data.length === 0) return;
+
+        var colorPalette = [
+            "#1e63e9", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444",
+            "#06b6d4", "#ec4899", "#84cc16", "#f97316", "#14b8a6"
+        ];
+        var bgColors = [];
+        for (var i = 0; i < data.length; i++) bgColors.push(colorPalette[i % colorPalette.length]);
+
+        new Chart(ctx, {
+            type: "doughnut",
+            data: { labels: labels, datasets: [{ data: data, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 4 }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: "68%", plugins: { legend: { display: false } } }
+        });
+    }
+
+    function renderHourlyBar(labels, data) {
+        var ctx = document.getElementById("hourlyBar").getContext("2d");
+        var existing = Chart.getChart(ctx.canvas);
+        if (existing) existing.destroy();
+        if (data.length === 0) return;
+
+        var colors = getChartColors();
+
+        new Chart(ctx, {
+            type: "bar",
+            data: { labels: labels, datasets: [{ data: data, backgroundColor: "rgba(30, 99, 233, 0.7)", borderRadius: 6, maxBarThickness: 20 }] },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { color: colors.text, font: { size: 10 } }, grid: { color: colors.grid, drawBorder: false } },
+                    x: { ticks: { color: colors.text, font: { size: 9 } }, grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // TIME RANGE
+    function calculateRange() {
+        var viewDate = document.getElementById("viewDate").value;
+        var fromHour = parseInt(document.getElementById("rangeFrom").value);
+        var toHour = parseInt(document.getElementById("rangeTo").value);
+        var resultEl = document.getElementById("rangeResult");
+        var t = translations[currentLang];
+
+        if (!viewDate) { resultEl.innerText = t.rangePrompt; return; }
+        if (fromHour > toHour) { resultEl.innerText = "From must be less than To"; return; }
+
+        var allData = getData();
+        var dayData = allData[viewDate] || {};
+        var rSales = 0, rGuests = 0;
+        for (var h = fromHour; h <= toHour; h++) {
+            if (dayData[h]) { rSales += dayData[h].sales; rGuests += dayData[h].guests; }
+        }
+        var rAvg = rGuests > 0 ? (rSales / rGuests).toFixed(2) : 0;
+        resultEl.innerHTML = "<span style='background: #1e63e9; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;'>" + formatHour12(fromHour) + " - " + formatHour12(toHour) + "</span> &nbsp; Sales: <b>" + rSales.toFixed(2) + "</b> &nbsp; | &nbsp; TC: <b>" + rGuests + "</b> &nbsp; | &nbsp; AC: <b>" + rAvg + "</b>";
+    }
+
+    // PREDICTION
+    function updatePrediction() {
+        var viewDate = document.getElementById("predictionDate").value;
+        var t = translations[currentLang];
+        var valueEl = document.getElementById("predictionValue");
+        var trendEl = document.getElementById("predictionTrend");
+        var detailEl = document.getElementById("predictionDetail");
+        var titleEl = document.getElementById("predictionTitle");
+        var confBadge = document.getElementById("confidenceBadge");
+        var basedOnEl = document.getElementById("basedOnLabel");
+
+        if (!viewDate) {
+            valueEl.innerText = "--";
+            trendEl.innerText = "";
+            detailEl.innerText = t.predictionNeedData;
+            confBadge.className = "conf-badge conf-low";
+            confBadge.innerText = t.confidenceLow;
+            basedOnEl.innerText = t.basedOnLabel.replace("{n}", "0");
+            return;
+        }
+
+        var todayStr = new Date().toISOString().split("T")[0];
+        var isToday = (viewDate === todayStr);
+
+        var allData = getData();
+        var dayData = allData[viewDate] || {};
+        var hours = Object.keys(dayData).map(Number).sort(function(a, b) { return a - b; });
+
+        if (hours.length < 3) {
+            titleEl.innerText = t.predictionTitle;
+            valueEl.innerText = "--";
+            trendEl.innerText = "";
+            detailEl.innerText = t.predictionNeedMore;
+            confBadge.className = "conf-badge conf-low";
+            confBadge.innerText = t.confidenceLow;
+            basedOnEl.innerText = t.basedOnLabel.replace("{n}", hours.length);
+            return;
+        }
+
+        var n = hours.length;
+        var sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+        for (var i = 0; i < hours.length; i++) {
+            var y = dayData[hours[i]].sales;
+            sumX += i; sumY += y; sumXY += i * y; sumX2 += i * i;
+        }
+        var denom = (n * sumX2) - (sumX * sumX);
+        var slope = 0, intercept = 0;
+        if (denom !== 0) {
+            slope = ((n * sumXY) - (sumX * sumY)) / denom;
+            intercept = (sumY - (slope * sumX)) / n;
+        } else { intercept = sumY / n; }
+
+        var confText = t.confidenceLow;
+        var confClass = "conf-low";
+        if (n >= 8) { confText = t.confidenceHigh; confClass = "conf-high"; }
+        else if (n >= 5) { confText = t.confidenceMedium; confClass = "conf-med"; }
+
+        if (isToday) {
+            titleEl.innerText = t.predictionTitle;
+            var pred = Math.max(0, (slope * n) + intercept);
+            var lastH = hours[hours.length - 1];
+            var nextH = (lastH + 1) % 24;
+            var lastVal = dayData[lastH].sales;
+            var diff = pred - lastVal;
+            var thresh = lastVal * 0.05;
+            var trendText = "", trendClass = "";
+            if (diff > thresh) { trendText = t.predictionRising; trendClass = "trend-up"; }
+            else if (diff < -thresh) { trendText = t.predictionFalling; trendClass = "trend-down"; }
+            else { trendText = t.predictionStable; trendClass = "trend-flat"; }
+            valueEl.innerText = pred.toFixed(2);
+            trendEl.innerHTML = "<span class='" + trendClass + "'>" + trendText + "</span>";
+            detailEl.innerHTML = t.predictionNextHour.replace("{hour}", "<b>" + formatHour12(nextH) + "</b>") + " <span style='opacity: 0.7;'> (Last: " + lastVal.toFixed(2) + " at " + formatHour12(lastH) + ")</span>";
+        } else {
+            titleEl.innerText = t.predictionTitleDay;
+            var projTotal = 0;
+            for (var idx = 0; idx < 24; idx++) {
+                var hv = (slope * idx) + intercept;
+                if (hv < 0) hv = 0;
+                projTotal += hv;
+            }
+            var actTotal = 0;
+            for (var hIdx = 0; hIdx < hours.length; hIdx++) actTotal += dayData[hours[hIdx]].sales;
+            var diffD = projTotal - actTotal;
+            var threshD = actTotal * 0.05;
+            var trendTextD = "", trendClassD = "";
+            if (diffD > threshD) { trendTextD = t.predictionRising; trendClassD = "trend-up"; }
+            else if (diffD < -threshD) { trendTextD = t.predictionFalling; trendClassD = "trend-down"; }
+            else { trendTextD = t.predictionStable; trendClassD = "trend-flat"; }
+            valueEl.innerText = projTotal.toFixed(2);
+            trendEl.innerHTML = "<span class='" + trendClassD + "'>" + trendTextD + "</span>";
+            detailEl.innerHTML = t.predictionProjectedDay + " <span style='opacity: 0.7;'> (" + t.predictionActualDay + ": " + actTotal.toFixed(2) + ")</span>";
+        }
+
+        confBadge.className = "conf-badge " + confClass;
+        confBadge.innerText = confText;
+        basedOnEl.innerText = t.basedOnLabel.replace("{n}", n);
+    }
+
+    // HISTORY
+    function setQuickRange(type) {
+        var today = new Date();
+        var from = "", to = today.toISOString().split("T")[0];
+        if (type === "month") {
+            from = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split("T")[0];
+            to = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split("T")[0];
+        } else if (type === "year") {
+            from = new Date(today.getFullYear(), 0, 1).toISOString().split("T")[0];
+            to = new Date(today.getFullYear(), 11, 31).toISOString().split("T")[0];
+        } else if (type === "last30") {
+            var p = new Date();
+            p.setDate(today.getDate() - 30);
+            from = p.toISOString().split("T")[0];
+        } else { from = to; }
+        document.getElementById("historyFromDate").value = from;
+        document.getElementById("historyToDate").value = to;
+    }
+
+    function calculateHistory() {
+        var from = document.getElementById("historyFromDate").value;
+        var to = document.getElementById("historyToDate").value;
+        var t = translations[currentLang];
+        if (!from) { alert(t.historyAlertFrom); return; }
+        if (!to) { alert(t.historyAlertTo); return; }
+        if (from > to) { alert(t.historyAlertOrder); return; }
+
+        var allData = getData();
+        var totalSales = 0, totalGuests = 0, days = 0;
+        for (var dateKey in allData) {
+            if (allData.hasOwnProperty(dateKey) && dateKey >= from && dateKey <= to) {
+                days++;
+                for (var h in allData[dateKey]) {
+                    totalSales += allData[dateKey][h].sales;
+                    totalGuests += allData[dateKey][h].guests;
+                }
+            }
+        }
+        if (days === 0) { alert(t.historyNoData); return; }
+
+        var avg = totalGuests > 0 ? (totalSales / totalGuests).toFixed(2) : 0;
+        document.getElementById("historyResultSales").innerText = totalSales.toFixed(2);
+        document.getElementById("historyResultGuests").innerText = totalGuests;
+        document.getElementById("historyResultAvg").innerText = avg;
+        document.getElementById("historyResultDays").innerText = days;
+        document.getElementById("historyResultBox").style.display = "grid";
+        document.getElementById("btnResetView").style.display = "block";
+        var titleEl = document.getElementById("historyResultTitle");
+        titleEl.innerText = from + "  →  " + to;
+        titleEl.style.display = "block";
+    }
+
+    function resetToDayView() {
+        document.getElementById("historyResultBox").style.display = "none";
+        document.getElementById("btnResetView").style.display = "none";
+        document.getElementById("historyResultTitle").style.display = "none";
+    }
+
+    // CLEAR DATA
+    function openClearDataModal() {
+        document.getElementById("clearDataPassword").value = "";
+        document.getElementById("passwordError").style.display = "none";
+        clearModalInstance.show();
+        setTimeout(function() { document.getElementById("clearDataPassword").focus(); }, 400);
+    }
+
+    function handlePasswordKeyPress(e) {
+        if (e.key === "Enter") confirmClearData();
+    }
+
+    function confirmClearData() {
+        var entered = document.getElementById("clearDataPassword").value;
+        if (entered === CLEAR_PASSWORD) {
+            localStorage.removeItem("salesTrackerData");
+            clearModalInstance.hide();
+            alert(translations[currentLang].clearSuccess);
+            renderDashboard();
+            updateLiveTotals();
+            updatePrediction();
+            renderEntryTable();
+            resetToDayView();
+        } else {
+            document.getElementById("passwordError").style.display = "block";
+            document.getElementById("clearDataPassword").value = "";
+            document.getElementById("clearDataPassword").focus();
+        }
+    }
+
+    // EXPORT
+    function exportToExcel() {
+        var viewDate = document.getElementById("viewDate").value;
+        if (!viewDate) { alert("Please select a date first."); return; }
+        var allData = getData();
+        var dayData = allData[viewDate] || {};
+        var sortedHours = Object.keys(dayData).sort(function(a, b) { return a - b; });
+        if (sortedHours.length === 0) { alert("No data to export."); return; }
+
+        var storeName = localStorage.getItem("salesTrackerStoreName") || "My Store";
+        var storeLocation = localStorage.getItem("salesTrackerStoreLocation") || "";
+
+        // Build data with header rows
+        var aoa = [];
+        aoa.push([storeName]);
+        if (storeLocation) aoa.push([storeLocation]);
+        aoa.push(["Sales Report - " + viewDate]);
+        aoa.push(["Generated: " + new Date().toLocaleString()]);
+        aoa.push([]); // blank row
+
+        var headers = ["Hour", "Sales", "Guests", "Avg Check"];
+        aoa.push(headers);
+
+        var totS = 0, totG = 0;
+        for (var i = 0; i < sortedHours.length; i++) {
+            var e = dayData[sortedHours[i]];
+            totS += e.sales;
+            totG += e.guests;
+            aoa.push([
+                formatHour12(parseInt(sortedHours[i])),
+                e.sales,
+                e.guests,
+                e.guests > 0 ? parseFloat((e.sales / e.guests).toFixed(2)) : 0
+            ]);
+        }
+
+        aoa.push([]);
+        aoa.push(["TOTAL", totS, totG, totG > 0 ? parseFloat((totS / totG).toFixed(2)) : 0]);
+
+        var ws = XLSX.utils.aoa_to_sheet(aoa);
+
+        // Merge title cells
+        ws["!merges"] = [
+            { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
+            { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
+            { s: { r: 2, c: 0 }, e: { r: 2, c: 3 } },
+            { s: { r: 3, c: 0 }, e: { r: 3, c: 3 } }
+        ];
+
+        ws["!cols"] = [{wch: 25}, {wch: 14}, {wch: 12}, {wch: 14}];
+
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Sales Data");
+        XLSX.writeFile(wb, "Sales_Report_" + viewDate + ".xlsx");
+    }
+
+    function exportToPDF() {
+        var viewDate = document.getElementById("viewDate").value;
+        if (!viewDate) { alert("Please select a date first."); return; }
+        var allData = getData();
+        var dayData = allData[viewDate] || {};
+        var sortedHours = Object.keys(dayData).sort(function(a, b) { return a - b; });
+        if (sortedHours.length === 0) { alert("No data to export."); return; }
+
+        var storeName = localStorage.getItem("salesTrackerStoreName") || "My Store";
+        var storeLocation = localStorage.getItem("salesTrackerStoreLocation") || "";
+
+        var jsPDF = window.jspdf.jsPDF;
+        var doc = new jsPDF();
+
+        // STORE HEADER
+        doc.setFontSize(22);
+        doc.setTextColor(30, 99, 233);
+        doc.setFont(undefined, "bold");
+        doc.text(storeName, 14, 22);
+
+        if (storeLocation) {
+            doc.setFontSize(11);
+            doc.setTextColor(100, 100, 100);
+            doc.setFont(undefined, "normal");
+            doc.text(storeLocation, 14, 29);
+        }
+
+        // Divider line
+        doc.setDrawColor(30, 99, 233);
+        doc.setLineWidth(0.5);
+        doc.line(14, storeLocation ? 34 : 28, 196, storeLocation ? 34 : 28);
+
+        // Report Info
+        var startY = storeLocation ? 42 : 36;
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.setFont(undefined, "normal");
+        doc.text("Sales Report", 14, startY);
+        doc.text("Date: " + viewDate, 14, startY + 6);
+        doc.text("Generated: " + new Date().toLocaleString(), 14, startY + 12);
+
+        // Summary
+        var totS = 0, totG = 0;
+        for (var i = 0; i < sortedHours.length; i++) {
+            totS += dayData[sortedHours[i]].sales;
+            totG += dayData[sortedHours[i]].guests;
+        }
+        var avg = totG > 0 ? (totS / totG).toFixed(2) : 0;
+
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont(undefined, "bold");
+        doc.text("Total Sales: " + totS.toFixed(2), 14, startY + 22);
+        doc.text("Total Guests (TC): " + totG, 14, startY + 29);
+        doc.text("Avg Check (AC): " + avg, 14, startY + 36);
+
+        // Range
+        var fromH = parseInt(document.getElementById("rangeFrom").value);
+        var toH = parseInt(document.getElementById("rangeTo").value);
+        var rS = 0, rG = 0;
+        if (fromH <= toH) {
+            for (var h = fromH; h <= toH; h++) {
+                if (dayData[h]) { rS += dayData[h].sales; rG += dayData[h].guests; }
+            }
+        }
+        var rA = rG > 0 ? (rS / rG).toFixed(2) : 0;
+        doc.setTextColor(200, 50, 50);
+        doc.setFontSize(10);
+        doc.text("Range (" + formatHour12(fromH) + " - " + formatHour12(toH) + "): Sales: " + rS.toFixed(2) + " | TC: " + rG + " | AC: " + rA, 14, startY + 44);
+
+        // Table
+        var rows = [];
+        for (var j = 0; j < sortedHours.length; j++) {
+            var e = dayData[sortedHours[j]];
+            rows.push([formatHour12(parseInt(sortedHours[j])), e.sales.toFixed(2), e.guests, e.guests > 0 ? (e.sales / e.guests).toFixed(2) : 0]);
+        }
+
+        doc.autoTable({
+            head: [["Hour", "Sales", "Guests", "Avg Check"]],
+            body: rows,
+            startY: startY + 50,
+            theme: "grid",
+            headStyles: { fillColor: [30, 99, 233], fontStyle: "bold" },
+            styles: { fontSize: 10 }
+        });
+
+        doc.save("Sales_Report_" + viewDate + ".pdf");
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
