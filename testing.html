@@ -1,0 +1,2338 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Aggregator Sales Analyzer | Withstand</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --sidebar: #0d1220;
+      --card: #141b2d;
+      --card-alt: #1a2236;
+      --card-hover: #1e2739;
+      --border: rgba(255,255,255,0.07);
+      --border-strong: rgba(255,255,255,0.12);
+      --text: #f1f5f9;
+      --text-dim: #8b97ad;
+      --text-dimmer: #5a6478;
+      --gold: #c9a961;
+      --gold-light: #e0c485;
+      --gold-dark: #a8894a;
+      --gold-soft: rgba(201,169,97,0.12);
+      --green: #10b981;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --amber: #f59e0b;
+      --purple: #8b5cf6;
+      --pink: #ec4899;
+      --teal: #14b8a6;
+      --orange: #f97316;
+      --cyan: #06b6d4;
+      --lime: #84cc16;
+      --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+      --shadow-lg: 0 20px 50px rgba(0,0,0,0.6);
+      --shadow-xl: 0 24px 60px rgba(0,0,0,0.75);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      display: flex;
+      overflow-x: hidden;
+    }
+    [dir="rtl"] body { font-family: 'Noto Kufi Arabic', 'Inter', sans-serif; }
+    [lang="hi"] body { font-family: 'Noto Sans Devanagari', 'Inter', sans-serif; }
+
+    /* ============================================================
+       SIDEBAR
+       ============================================================ */
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      height: 100vh;
+      position: sticky; top: 0;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0; z-index: 100;
+    }
+    [dir="rtl"] .sidebar { border-right: none; border-left: 1px solid var(--border); }
+    .sidebar.collapsed { width: 72px; }
+
+    .sidebar-header {
+      padding: 1.25rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      gap: 0.75rem; justify-content: space-between;
+      min-height: 72px;
+    }
+    .brand { display: flex; align-items: center; gap: 0.75rem; overflow: hidden; flex: 1; min-width: 0; }
+    .brand-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      display: flex; align-items: center; justify-content: center;
+      color: #0a0e1a; font-size: 1.15rem; flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(201,169,97,0.3);
+    }
+    .brand-text {
+      display: flex; flex-direction: column; line-height: 1.15;
+      white-space: nowrap; overflow: hidden;
+      transition: opacity 0.2s, width 0.3s;
+    }
+    .sidebar.collapsed .brand-text { opacity: 0; width: 0; }
+    .brand-name { font-size: 0.95rem; font-weight: 800; letter-spacing: 0.02em; }
+    .brand-sub {
+      font-size: 0.65rem; color: var(--text-dim);
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+    }
+
+    .collapse-btn {
+      background: transparent; border: none;
+      color: var(--text-dim); width: 32px; height: 32px;
+      border-radius: 8px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.2s;
+    }
+    .collapse-btn:hover { background: var(--card); color: var(--gold); }
+
+    .sidebar-nav { flex: 1; padding: 1rem 0.75rem; overflow-y: auto; }
+    .nav-section-label {
+      font-size: 0.65rem; color: var(--text-dimmer);
+      font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.12em; padding: 0.75rem 0.75rem 0.5rem;
+      white-space: nowrap; overflow: hidden; transition: opacity 0.2s;
+    }
+    .sidebar.collapsed .nav-section-label { opacity: 0; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 0.85rem;
+      padding: 0.7rem 0.75rem; border-radius: 10px;
+      color: var(--text-dim); font-size: 0.88rem; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+      white-space: nowrap; overflow: hidden;
+      margin-bottom: 2px; text-decoration: none;
+      position: relative;
+    }
+    .nav-item:hover { background: var(--card); color: var(--text); }
+    .nav-item.active {
+      background: var(--gold-soft); color: var(--gold-light); font-weight: 600;
+    }
+    .nav-item.active .nav-icon { color: var(--gold); }
+    .nav-item.danger:hover { background: rgba(239,68,68,0.12); color: #fca5a5; }
+    .nav-item.danger .nav-icon { color: #ef4444; }
+
+    .nav-icon { width: 20px; text-align: center; font-size: 1rem; flex-shrink: 0; }
+    .nav-label { transition: opacity 0.2s; overflow: hidden; }
+    .sidebar.collapsed .nav-label { opacity: 0; width: 0; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--card-alt);
+      color: var(--text-dim);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    [dir="rtl"] .nav-badge { margin-left: 0; margin-right: auto; }
+    .sidebar.collapsed .nav-badge { display: none; }
+
+    .sidebar-footer {
+      padding: 1rem 0.75rem;
+      border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .lang-switch {
+      display: flex; background: var(--card);
+      border-radius: 40px; padding: 3px;
+      border: 1px solid var(--border); gap: 2px;
+    }
+    .sidebar.collapsed .lang-switch { flex-direction: column; border-radius: 12px; }
+    .lang-btn {
+      flex: 1; background: transparent; border: none;
+      padding: 0.45rem 0.5rem; border-radius: 40px;
+      font-weight: 700; font-size: 0.72rem;
+      color: var(--text-dim); cursor: pointer;
+      transition: all 0.2s; font-family: inherit; white-space: nowrap;
+    }
+    .sidebar.collapsed .lang-btn {
+      border-radius: 8px; padding: 0.4rem 0.3rem; font-size: 0.65rem;
+    }
+    .lang-btn.active { background: var(--gold); color: #0a0e1a; }
+
+    /* ============================================================
+       MAIN
+       ============================================================ */
+    .main {
+      flex: 1; min-width: 0;
+      padding: 1.5rem 2rem;
+      max-width: 1400px; margin: 0 auto; width: 100%;
+    }
+
+    .topbar {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .topbar-title h1 {
+      font-size: 1.5rem; font-weight: 800;
+      letter-spacing: -0.02em; margin-bottom: 0.15rem;
+    }
+    .topbar-title p {
+      font-size: 0.82rem; color: var(--text-dim); font-weight: 500;
+    }
+    .topbar-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    /* ============================================================
+       STORE HEADER CARD — name + location inputs
+       ============================================================ */
+    .store-card {
+      background: linear-gradient(135deg, rgba(201,169,97,0.08) 0%, rgba(201,169,97,0.02) 100%);
+      border: 1px solid rgba(201,169,97,0.25);
+      border-radius: 14px;
+      padding: 1.1rem 1.4rem;
+      margin-bottom: 1.25rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.9rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    .store-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(180deg, var(--gold), var(--gold-dark));
+    }
+    .store-card .field input {
+      background: rgba(10,14,26,0.5);
+      border: 1px solid rgba(201,169,97,0.25);
+    }
+    .store-card .field input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-soft);
+    }
+    .store-card .field label {
+      color: var(--gold-light);
+      display: flex; align-items: center; gap: 0.35rem;
+    }
+    @media (max-width: 600px) {
+      .store-card { grid-template-columns: 1fr; padding: 1rem; }
+    }
+
+    /* ============================================================
+       COMPACT DATE PICKER BAR
+       ============================================================ */
+    .date-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .date-picker { position: relative; user-select: none; }
+
+    .date-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: var(--card);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 0.6rem 0.85rem;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 220px;
+      box-shadow: var(--shadow-md);
+    }
+    .date-trigger:hover { border-color: var(--gold); background: var(--card-hover); }
+    .date-trigger.open { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+
+    .date-trigger .dt-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      display: flex; align-items: center; justify-content: center;
+      color: #0a0e1a; font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .date-trigger .dt-text {
+      display: flex; flex-direction: column;
+      line-height: 1.15; text-align: left; flex: 1;
+    }
+    [dir="rtl"] .date-trigger .dt-text { text-align: right; }
+    .date-trigger .dt-label {
+      font-size: 0.62rem; color: var(--text-dim);
+      font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .date-trigger .dt-value {
+      font-size: 0.88rem; font-weight: 700;
+      color: var(--text); margin-top: 1px;
+    }
+    .date-trigger .dt-chevron {
+      color: var(--text-dim); font-size: 0.7rem;
+      transition: transform 0.2s;
+    }
+    .date-trigger.open .dt-chevron { transform: rotate(180deg); }
+
+    .calendar-popup {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      z-index: 500;
+      background: var(--card);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 0.9rem;
+      width: 300px;
+      box-shadow: var(--shadow-xl);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+    }
+    [dir="rtl"] .calendar-popup { left: auto; right: 0; }
+    .calendar-popup.open { opacity: 1; visibility: visible; transform: translateY(0); }
+
+    .cal-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem; gap: 0.4rem;
+    }
+    .cal-title {
+      font-size: 0.88rem; font-weight: 700;
+      color: var(--gold-light);
+      text-align: center; flex: 1;
+    }
+    .cal-nav {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .cal-nav:hover { background: var(--card-alt); border-color: var(--gold); color: var(--gold); }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+    }
+    .cal-dow {
+      text-align: center;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: var(--text-dimmer);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.3rem 0;
+    }
+    .cal-day {
+      aspect-ratio: 1;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 500;
+      transition: all 0.15s;
+      position: relative;
+      padding: 0;
+    }
+    .cal-day:hover { background: var(--card-hover); border-color: var(--border-strong); }
+    .cal-day.empty { background: transparent; cursor: default; pointer-events: none; }
+    .cal-day.today { border-color: var(--gold); color: var(--gold-light); font-weight: 700; }
+    .cal-day.active {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: #0a0e1a; font-weight: 800;
+      box-shadow: 0 4px 10px rgba(201,169,97,0.35);
+    }
+    .cal-day.has-data::after {
+      content: '';
+      position: absolute;
+      bottom: 3px;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+    .cal-day.active.has-data::after { background: #0a0e1a; }
+
+    .date-quick { display: flex; gap: 0.4rem; align-items: center; }
+    .quick-btn {
+      background: var(--card);
+      border: 1px solid var(--border-strong);
+      color: var(--text-dim);
+      padding: 0.55rem 0.85rem;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      height: 40px;
+    }
+    .quick-btn:hover { background: var(--card-hover); border-color: var(--gold); color: var(--gold-light); }
+    .quick-btn.icon-only { padding: 0.55rem; width: 40px; justify-content: center; }
+
+    /* ============================================================
+       CARDS
+       ============================================================ */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.4rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow-md);
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: var(--border-strong); }
+
+    .card-title {
+      font-size: 1rem; font-weight: 700;
+      margin-bottom: 1.1rem;
+      display: flex; align-items: center; gap: 0.55rem;
+      color: var(--gold-light);
+      letter-spacing: 0.01em;
+    }
+    .card-title i { font-size: 0.9rem; }
+    .card-title .title-hint {
+      margin-left: auto;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    [dir="rtl"] .card-title .title-hint { margin-left: 0; margin-right: auto; }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .chart-title-block { display: flex; flex-direction: column; gap: 0.2rem; }
+    .chart-title-block .ct-main {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .chart-title-block .ct-sub {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .chart-total-pill {
+      background: var(--gold-soft);
+      border: 1px solid rgba(201,169,97,0.3);
+      color: var(--gold-light);
+      padding: 0.45rem 0.9rem;
+      border-radius: 40px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    @media (max-width: 1000px) { .charts-grid { grid-template-columns: 1fr; } }
+
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.4rem;
+      box-shadow: var(--shadow-md);
+      transition: border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 0;
+    }
+    .chart-card:hover { border-color: var(--border-strong); }
+
+    /* FORM */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    .field label {
+      display: block;
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .field input {
+      width: 100%;
+      background: var(--card-alt);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 0.9rem;
+      color: var(--text);
+      font-size: 0.92rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--gold-soft);
+    }
+    .field input::placeholder { color: #4a5568; }
+
+    /* BUTTONS */
+    .btn-row { display: flex; gap: 0.55rem; flex-wrap: wrap; }
+    .btn {
+      padding: 0.7rem 1.3rem;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.85rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: #0a0e1a;
+      box-shadow: 0 4px 14px rgba(201,169,97,0.25);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(201,169,97,0.45);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--card-alt);
+      color: var(--text);
+      border: 1px solid var(--border-strong);
+    }
+    .btn-secondary:hover { background: #24304a; border-color: var(--gold); }
+    .btn-green {
+      background: rgba(16,185,129,0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16,185,129,0.3);
+    }
+    .btn-green:hover { background: rgba(16,185,129,0.25); }
+    .btn-red {
+      background: rgba(239,68,68,0.13);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+    .btn-red:hover { background: rgba(239,68,68,0.22); }
+
+    /* TOTALS */
+    .totals-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+    .total-box {
+      background: linear-gradient(160deg, var(--card) 0%, var(--card-alt) 100%);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.1rem 1.25rem;
+      position: relative; overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    .total-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: var(--accent, var(--gold));
+    }
+    .total-box .label {
+      font-size: 0.68rem; color: var(--text-dim);
+      font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 0.4rem;
+    }
+    .total-box .value {
+      font-size: 1.45rem; font-weight: 800;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+    .total-box.gold   { --accent: var(--gold);   }
+    .total-box.green  { --accent: var(--green);  }
+    .total-box.blue   { --accent: var(--blue);   }
+    .total-box.gold .value  { color: var(--gold-light); }
+    .total-box.green .value { color: #6ee7b7; }
+    .total-box.blue .value  { color: #93c5fd; }
+
+    /* TABLE */
+    .entries-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .entries-table th, .entries-table td {
+      padding: 0.7rem 0.6rem;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+    }
+    .entries-table th:first-child,
+    .entries-table td:first-child { text-align: left; }
+    [dir="rtl"] .entries-table th, [dir="rtl"] .entries-table td { text-align: left; }
+    [dir="rtl"] .entries-table th:first-child,
+    [dir="rtl"] .entries-table td:first-child { text-align: right; }
+
+    .entries-table th {
+      font-size: 0.7rem; color: var(--text-dim);
+      font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: rgba(255,255,255,0.02);
+    }
+    .entries-table tbody tr { transition: background 0.15s; }
+    .entries-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .entries-table tr:last-child td { border-bottom: none; }
+
+    .source-name {
+      font-weight: 600;
+      display: flex; align-items: center; gap: 0.55rem;
+    }
+    .source-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%; flex-shrink: 0;
+    }
+    .pct-cell { color: var(--text-dim); font-variant-numeric: tabular-nums; }
+    .amt-cell { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .delete-btn {
+      background: transparent; border: none;
+      color: var(--text-dim); cursor: pointer;
+      padding: 5px 9px; border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .delete-btn:hover { background: rgba(239,68,68,0.15); color: #fca5a5; }
+
+    /* EMPTY */
+    .empty-state { text-align: center; padding: 2.25rem 1rem; color: var(--text-dim); }
+    .empty-state i { font-size: 2.5rem; opacity: 0.25; margin-bottom: 0.85rem; display: block; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* CHART canvas wrap */
+    .chart-wrap { position: relative; height: 340px; padding: 0.5rem 0; flex: 1; }
+    .chart-wrap.donut { height: 340px; }
+
+    .donut-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      margin-top: 0.9rem;
+      padding-top: 0.9rem;
+      border-top: 1px solid var(--border);
+    }
+    .dl-item {
+      display: flex; align-items: center; gap: 0.45rem;
+      font-size: 0.78rem; color: var(--text); font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .dl-item:hover { opacity: 0.75; }
+    .dl-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0; box-shadow: 0 0 6px rgba(255,255,255,0.15);
+    }
+    .dl-pct { color: var(--text-dim); font-weight: 500; }
+
+    /* ============================================================
+       TOASTS
+       ============================================================ */
+    .toast-container {
+      position: fixed; top: 1.25rem; right: 1.25rem;
+      z-index: 9999;
+      display: flex; flex-direction: column; gap: 0.6rem;
+      pointer-events: none; max-width: 340px;
+    }
+    [dir="rtl"] .toast-container { right: auto; left: 1.25rem; }
+
+    .toast {
+      background: linear-gradient(160deg, #1a2338 0%, #141b2d 100%);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 0.9rem 1.1rem;
+      display: flex; align-items: center; gap: 0.85rem;
+      box-shadow: var(--shadow-lg);
+      pointer-events: auto;
+      animation: toastIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative; overflow: hidden;
+      min-width: 260px; backdrop-filter: blur(12px);
+    }
+    .toast::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: var(--toast-accent, var(--gold));
+    }
+    .toast.removing { animation: toastOut 0.35s ease forwards; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(60px) scale(0.95); }
+      to   { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    @keyframes toastOut { to { opacity: 0; transform: translateX(60px) scale(0.9); } }
+
+    .toast-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 1rem; flex-shrink: 0;
+      background: var(--toast-accent, var(--gold));
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .toast-body { flex: 1; min-width: 0; }
+    .toast-title { font-size: 0.88rem; font-weight: 700; color: var(--text); margin-bottom: 0.1rem; }
+    .toast-message {
+      font-size: 0.78rem; color: var(--text-dim); font-weight: 500;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .toast.success { --toast-accent: var(--green); }
+    .toast.error   { --toast-accent: var(--red); }
+    .toast.info    { --toast-accent: var(--blue); }
+    .toast.warn    { --toast-accent: var(--amber); }
+    .toast.export  { --toast-accent: var(--purple); }
+
+    .toast-progress {
+      position: absolute; bottom: 0; left: 0;
+      height: 2px;
+      background: var(--toast-accent, var(--gold));
+      animation: toastProgress 3s linear forwards;
+    }
+    @keyframes toastProgress { from { width: 100%; } to { width: 0%; } }
+
+    /* ============================================================
+       CONFIRM MODAL
+       ============================================================ */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 10000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      opacity: 0; visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+    .modal-overlay.open { opacity: 1; visibility: visible; }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border-strong);
+      border-radius: 16px;
+      padding: 1.6rem;
+      max-width: 420px; width: 100%;
+      box-shadow: var(--shadow-xl);
+      transform: scale(0.95);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-overlay.open .modal { transform: scale(1); }
+
+    .modal-icon {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      background: rgba(239,68,68,0.15);
+      color: #fca5a5;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+    }
+    .modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text); }
+    .modal-text { font-size: 0.88rem; color: var(--text-dim); margin-bottom: 1.4rem; line-height: 1.55; }
+    .modal-text strong { color: var(--gold-light); }
+    .modal-actions { display: flex; gap: 0.6rem; justify-content: flex-end; flex-wrap: wrap; }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 900px) {
+      .sidebar { width: 72px; }
+      .sidebar .brand-text,
+      .sidebar .nav-label,
+      .sidebar .nav-section-label,
+      .sidebar .nav-badge { opacity: 0; width: 0; display: none; }
+      .sidebar .lang-switch { flex-direction: column; border-radius: 12px; }
+      .sidebar .lang-btn { border-radius: 8px; padding: 0.4rem 0.3rem; font-size: 0.65rem; }
+      .main { padding: 1rem; }
+    }
+    @media (max-width: 600px) {
+      .topbar-title h1 { font-size: 1.15rem; }
+      .card { padding: 1rem; }
+      .chart-card { padding: 1rem; }
+      .total-box .value { font-size: 1.1rem; }
+      .entries-table { font-size: 0.76rem; }
+      .entries-table th, .entries-table td { padding: 0.55rem 0.35rem; }
+      .chart-wrap { height: 260px; }
+      .chart-wrap.donut { height: 240px; }
+      .toast-container { top: 0.6rem; right: 0.6rem; left: 0.6rem; max-width: none; }
+      [dir="rtl"] .toast-container { right: 0.6rem; left: 0.6rem; }
+      .btn { padding: 0.65rem 1rem; font-size: 0.8rem; }
+
+      .date-trigger { min-width: 0; padding: 0.5rem 0.7rem; height: 40px; }
+      .date-trigger .dt-icon { width: 28px; height: 28px; font-size: 0.75rem; }
+      .date-trigger .dt-label { display: none; }
+      .date-trigger .dt-value { font-size: 0.82rem; }
+
+      .calendar-popup { width: calc(100vw - 2rem); max-width: 320px; }
+
+      .quick-btn { padding: 0.5rem 0.7rem; font-size: 0.75rem; height: 36px; }
+      .quick-btn.icon-only { width: 36px; padding: 0.5rem; }
+
+      .chart-header { gap: 0.6rem; }
+      .chart-total-pill { font-size: 0.72rem; padding: 0.35rem 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     SIDEBAR
+     ============================================================ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-icon"><i class="fas fa-chart-pie"></i></div>
+      <div class="brand-text">
+        <div class="brand-name">Withstand</div>
+        <div class="brand-sub" data-i18n="brandSub">Analytics</div>
+      </div>
+    </div>
+    <button class="collapse-btn" id="collapseBtn" aria-label="Toggle sidebar">
+      <i class="fas fa-chevron-left" id="collapseIcon"></i>
+    </button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label" data-i18n="navMain">Main</div>
+
+    <a class="nav-item active" data-section="dashboard">
+      <i class="fas fa-chart-pie nav-icon"></i>
+      <span class="nav-label" data-i18n="navDashboard">Dashboard</span>
+    </a>
+    <a class="nav-item" data-section="entries">
+      <i class="fas fa-list nav-icon"></i>
+      <span class="nav-label" data-i18n="navEntries">Entries</span>
+    </a>
+    <a class="nav-item" data-section="analytics">
+      <i class="fas fa-chart-bar nav-icon"></i>
+      <span class="nav-label" data-i18n="navAnalytics">Analytics</span>
+    </a>
+
+    <div class="nav-section-label" data-i18n="navActions">Actions</div>
+
+    <a class="nav-item" id="navExportExcel">
+      <i class="fas fa-file-excel nav-icon" style="color:#10b981;"></i>
+      <span class="nav-label" data-i18n="navExportExcel">Export Excel</span>
+    </a>
+    <a class="nav-item" id="navExportPDF">
+      <i class="fas fa-file-pdf nav-icon" style="color:#ef4444;"></i>
+      <span class="nav-label" data-i18n="navExportPDF">Export PDF</span>
+    </a>
+
+    <div class="nav-section-label" data-i18n="navDanger">Danger Zone</div>
+
+    <a class="nav-item danger" id="navClearAll">
+      <i class="fas fa-trash-can nav-icon"></i>
+      <span class="nav-label" data-i18n="navClearAll">Clear All Data</span>
+      <span class="nav-badge" id="navDataCount">0</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="lang-switch">
+      <button class="lang-btn active" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="hi">हिं</button>
+      <button class="lang-btn" data-lang="ar">عربي</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ============================================================
+     MAIN
+     ============================================================ -->
+<main class="main">
+
+  <div class="topbar">
+    <div class="topbar-title">
+      <h1 data-i18n="title">Aggregator Sales Analyzer</h1>
+      <p data-i18n="subtitle">Daily Report Breakdown · Corporate Edition</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-green" id="topExportExcel">
+        <i class="fas fa-file-excel"></i> <span data-i18n="excel">Excel</span>
+      </button>
+      <button class="btn btn-red" id="topExportPDF">
+        <i class="fas fa-file-pdf"></i> <span data-i18n="pdf">PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       STORE CARD — name + location (appear on PDF report)
+       ============================================================ -->
+  <div class="store-card">
+    <div class="field">
+      <label data-i18n="storeName">
+        <i class="fas fa-store" style="font-size:0.7rem;"></i>
+        Store Name
+      </label>
+      <input type="text" id="storeName" placeholder="e.g. Wrap & Go West Walk" maxlength="80">
+    </div>
+    <div class="field">
+      <label data-i18n="storeLocation">
+        <i class="fas fa-map-marker-alt" style="font-size:0.7rem;"></i>
+        Location
+      </label>
+      <input type="text" id="storeLocation" placeholder="e.g. West Walk, Doha" maxlength="80">
+    </div>
+  </div>
+
+  <!-- DATE TOOLBAR -->
+  <div class="date-toolbar">
+    <div class="date-picker" id="datePicker">
+      <button class="date-trigger" id="dateTrigger">
+        <span class="dt-icon"><i class="fas fa-calendar-day"></i></span>
+        <span class="dt-text">
+          <span class="dt-label" data-i18n="activeDate">Active Date</span>
+          <span class="dt-value" id="dtValue">—</span>
+        </span>
+        <i class="fas fa-chevron-down dt-chevron"></i>
+      </button>
+
+      <div class="calendar-popup" id="calendarPopup">
+        <div class="cal-header">
+          <button class="cal-nav" id="prevMonthBtn"><i class="fas fa-chevron-left"></i></button>
+          <div class="cal-title" id="calTitle">—</div>
+          <button class="cal-nav" id="nextMonthBtn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+    </div>
+
+    <div class="date-quick">
+      <button class="quick-btn icon-only" id="prevDayBtn" title="Previous day">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button class="quick-btn icon-only" id="nextDayBtn" title="Next day">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+      <button class="quick-btn" id="todayBtn">
+        <i class="fas fa-calendar-check"></i>
+        <span data-i18n="today">Today</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ADD ENTRY -->
+  <div class="card" id="section-dashboard">
+    <div class="card-title">
+      <i class="fas fa-plus-circle"></i>
+      <span data-i18n="addEntry">Add Entry</span>
+      <span class="title-hint">
+        <i class="fas fa-calendar-check"></i>
+        <span id="addEntryDate">—</span>
+      </span>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label data-i18n="source">Source</label>
+        <input type="text" id="inputSource" placeholder="Cash, Talabat, Snoonu…" list="sourceList">
+        <datalist id="sourceList">
+          <option value="Cash"><option value="Card"><option value="Snoonu">
+          <option value="Talabat"><option value="Keeta"><option value="Rafeeq">
+          <option value="Beanz"><option value="Discount">
+        </datalist>
+      </div>
+      <div class="field">
+        <label data-i18n="amount">Amount (QAR)</label>
+        <input type="number" id="inputAmount" placeholder="0.00" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="addBtn">
+        <i class="fas fa-plus"></i> <span data-i18n="add">Add Entry</span>
+      </button>
+      <button class="btn btn-red" id="clearBtn">
+        <i class="fas fa-trash"></i> <span data-i18n="clearDay">Clear This Day</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- TOTALS -->
+  <div class="totals-strip">
+    <div class="total-box gold">
+      <div class="label" data-i18n="grossSales">Gross Sales</div>
+      <div class="value" id="totalGross">0.00</div>
+    </div>
+    <div class="total-box green">
+      <div class="label" data-i18n="totalDiscount">Discount</div>
+      <div class="value" id="totalDiscount">0.00</div>
+    </div>
+    <div class="total-box blue">
+      <div class="label" data-i18n="netSales">Net Sales</div>
+      <div class="value" id="totalNet">0.00</div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card" id="section-entries">
+    <div class="card-title"><i class="fas fa-list-ol"></i> <span data-i18n="breakdown">Breakdown</span></div>
+    <div id="tableContainer">
+      <div class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <p data-i18n="noData">No entries for this date. Add your first entry above.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DUAL CHARTS -->
+  <div class="charts-grid" id="section-analytics">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title-block">
+          <div class="ct-main">
+            <i class="fas fa-chart-column" style="color: var(--gold);"></i>
+            <span data-i18n="chartBar">Sales Distribution</span>
+          </div>
+          <div class="ct-sub" id="chartSubtitle">—</div>
+        </div>
+        <div class="chart-total-pill">
+          <i class="fas fa-coins"></i>
+          <span id="chartTotal">0.00 QAR</span>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="salesChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title-block">
+          <div class="ct-main">
+            <i class="fas fa-chart-pie" style="color: var(--gold);"></i>
+            <span data-i18n="chartDonut">Share Breakdown</span>
+          </div>
+          <div class="ct-sub" id="donutSubtitle">—</div>
+        </div>
+      </div>
+      <div class="chart-wrap donut">
+        <canvas id="donutChart"></canvas>
+      </div>
+      <div class="donut-legend" id="donutLegend"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- TOASTS -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <div class="modal-icon" id="modalIcon"><i class="fas fa-triangle-exclamation"></i></div>
+    <div class="modal-title" id="modalTitle">Confirm</div>
+    <div class="modal-text" id="modalText">Are you sure?</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="modalCancel" data-i18n="cancel">Cancel</button>
+      <button class="btn btn-red" id="modalConfirm" data-i18n="confirmDelete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ============================================================
+     TRANSLATIONS
+     ============================================================ */
+  const translations = {
+    en: {
+      brandSub: "Analytics", navMain: "Main", navActions: "Actions", navDanger: "Danger Zone",
+      navDashboard: "Dashboard", navEntries: "Entries", navAnalytics: "Analytics",
+      navExportExcel: "Export Excel", navExportPDF: "Export PDF", navClearAll: "Clear All Data",
+      title: "Aggregator Sales Analyzer",
+      subtitle: "Daily Report Breakdown · Corporate Edition",
+      storeName: "Store Name", storeLocation: "Location",
+      activeDate: "Active Date", today: "Today",
+      addEntry: "Add Entry", source: "Source", amount: "Amount (QAR)",
+      add: "Add Entry", clearDay: "Clear This Day",
+      excel: "Excel", pdf: "PDF",
+      grossSales: "Gross Sales", totalDiscount: "Discount", netSales: "Net Sales",
+      breakdown: "Breakdown", chartBar: "Sales Distribution", chartDonut: "Share Breakdown",
+      noData: "No entries for this date. Add your first entry above.",
+      sourceCol: "Source", amountCol: "Amount", pctCol: "% Share",
+      cancel: "Cancel", confirmDelete: "Delete",
+      confirmClearDay: "Delete all entries for this date?",
+      confirmClearAll: "Delete ALL data?",
+      confirmClearAllDetail: "This will permanently erase all saved entries from every date. This cannot be undone.",
+      confirmDel: "Delete this entry?",
+      toastSaved: "Entry Saved", toastDeleted: "Entry Deleted",
+      toastDeletedMsg: "removed from records",
+      toastCleared: "Day Cleared", toastClearedMsg: "entries removed for this date",
+      toastClearedAll: "All Data Cleared", toastClearedAllMsg: "every entry has been removed",
+      toastExcel: "Excel Exported", toastExcelMsg: "report.xlsx downloaded",
+      toastPDF: "PDF Exported", toastPDFMsg: "report.pdf downloaded",
+      toastEmpty: "Nothing to Export", toastEmptyMsg: "Add entries first",
+      toastError: "Invalid Entry", toastErrorMsg: "Please fill all fields correctly",
+      toastDateChanged: "Date Changed", toastDateChangedMsg: "Loaded entries for",
+      toastNoData: "No Data", toastNoDataMsg: "No entries saved for this date",
+      toastSavedLocally: "Saved in browser", toastSavedLocallyMsg: "Stored locally — will not be lost",
+      toastStoreSaved: "Store Info Saved", toastStoreSavedMsg: "Name & location updated",
+      chartSub: "Category breakdown for the selected date",
+      chartSubNoData: "No data for this date",
+      donutSub: "Proportional share per source",
+      donutSubNoData: "No data for this date",
+      donutTotal: "Total",
+      modalClearDayTitle: "Clear This Day?",
+      modalClearAllTitle: "Clear ALL Data?",
+      modalDeleteEntryTitle: "Delete Entry?",
+      pdfStore: "Store", pdfLocation: "Location", pdfDate: "Date", pdfGenerated: "Generated",
+      pdfGross: "Gross Sales", pdfDiscount: "Discount", pdfNet: "Net Sales",
+      pdfCharts: "Charts", pdfBreakdown: "Source Breakdown"
+    },
+    hi: {
+      brandSub: "एनालिटिक्स", navMain: "मुख्य", navActions: "कार्य", navDanger: "खतरा क्षेत्र",
+      navDashboard: "डैशबोर्ड", navEntries: "प्रविष्टियाँ", navAnalytics: "विश्लेषण",
+      navExportExcel: "Excel निर्यात", navExportPDF: "PDF निर्यात", navClearAll: "सारा डेटा हटाएं",
+      title: "एग्रीगेटर बिक्री विश्लेषक",
+      subtitle: "दैनिक रिपोर्ट विवरण · कॉर्पोरेट संस्करण",
+      storeName: "स्टोर का नाम", storeLocation: "स्थान",
+      activeDate: "सक्रिय तिथि", today: "आज",
+      addEntry: "प्रविष्टि जोड़ें", source: "स्रोत", amount: "राशि (QAR)",
+      add: "प्रविष्टि जोड़ें", clearDay: "इस दिन को हटाएं",
+      excel: "Excel", pdf: "PDF",
+      grossSales: "सकल बिक्री", totalDiscount: "छूट", netSales: "शुद्ध बिक्री",
+      breakdown: "विवरण", chartBar: "बिक्री वितरण", chartDonut: "हिस्सा विवरण",
+      noData: "इस तिथि के लिए कोई प्रविष्टि नहीं। ऊपर पहली प्रविष्टि जोड़ें।",
+      sourceCol: "स्रोत", amountCol: "राशि", pctCol: "% हिस्सा",
+      cancel: "रद्द करें", confirmDelete: "हटाएं",
+      confirmClearDay: "इस तिथि की सभी प्रविष्टियाँ हटाएं?",
+      confirmClearAll: "सारा डेटा हटाएं?",
+      confirmClearAllDetail: "यह हर तिथि की सभी सहेजी गई प्रविष्टियों को स्थायी रूप से मिटा देगा। इसे पूर्ववत नहीं किया जा सकता।",
+      confirmDel: "यह प्रविष्टि हटाएं?",
+      toastSaved: "प्रविष्टि सहेजी गई", toastDeleted: "प्रविष्टि हटाई गई",
+      toastDeletedMsg: "रिकॉर्ड से हटाया गया",
+      toastCleared: "दिन साफ़ किया", toastClearedMsg: "इस तिथि की प्रविष्टियाँ हटाई गईं",
+      toastClearedAll: "सारा डेटा हटाया गया", toastClearedAllMsg: "सभी प्रविष्टियाँ हटा दी गईं",
+      toastExcel: "Excel निर्यात", toastExcelMsg: "report.xlsx डाउनलोड हुआ",
+      toastPDF: "PDF निर्यात", toastPDFMsg: "report.pdf डाउनलोड हुआ",
+      toastEmpty: "निर्यात के लिए कुछ नहीं", toastEmptyMsg: "पहले प्रविष्टियाँ जोड़ें",
+      toastError: "अमान्य प्रविष्टि", toastErrorMsg: "कृपया सभी फ़ील्ड सही भरें",
+      toastDateChanged: "तिथि बदली", toastDateChangedMsg: "प्रविष्टियाँ लोड की गईं",
+      toastNoData: "कोई डेटा नहीं", toastNoDataMsg: "इस तिथि के लिए कोई प्रविष्टि नहीं",
+      toastSavedLocally: "ब्राउज़र में सहेजा", toastSavedLocallyMsg: "स्थानीय रूप से संग्रहीत — खोएगा नहीं",
+      toastStoreSaved: "स्टोर जानकारी सहेजी", toastStoreSavedMsg: "नाम और स्थान अपडेट हुआ",
+      chartSub: "चयनित तिथि के लिए श्रेणी विवरण",
+      chartSubNoData: "इस तिथि के लिए कोई डेटा नहीं",
+      donutSub: "प्रति स्रोत आनुपातिक हिस्सा",
+      donutSubNoData: "इस तिथि के लिए कोई डेटा नहीं",
+      donutTotal: "कुल",
+      modalClearDayTitle: "इस दिन को हटाएं?",
+      modalClearAllTitle: "सारा डेटा हटाएं?",
+      modalDeleteEntryTitle: "प्रविष्टि हटाएं?",
+      pdfStore: "स्टोर", pdfLocation: "स्थान", pdfDate: "तिथि", pdfGenerated: "बनाया गया",
+      pdfGross: "सकल बिक्री", pdfDiscount: "छूट", pdfNet: "शुद्ध बिक्री",
+      pdfCharts: "चार्ट", pdfBreakdown: "स्रोत विवरण"
+    },
+    ar: {
+      brandSub: "التحليلات", navMain: "الرئيسية", navActions: "الإجراءات", navDanger: "منطقة الخطر",
+      navDashboard: "لوحة التحكم", navEntries: "المدخلات", navAnalytics: "التحليلات",
+      navExportExcel: "تصدير Excel", navExportPDF: "تصدير PDF", navClearAll: "مسح كل البيانات",
+      title: "محلل مبيعات المجمعات",
+      subtitle: "تفصيل التقرير اليومي · النسخة المؤسسية",
+      storeName: "اسم المتجر", storeLocation: "الموقع",
+      activeDate: "التاريخ النشط", today: "اليوم",
+      addEntry: "إضافة مدخل", source: "المصدر", amount: "المبلغ (ريال)",
+      add: "إضافة مدخل", clearDay: "مسح هذا اليوم",
+      excel: "Excel", pdf: "PDF",
+      grossSales: "إجمالي المبيعات", totalDiscount: "الخصم", netSales: "صافي المبيعات",
+      breakdown: "التفصيل", chartBar: "توزيع المبيعات", chartDonut: "تفصيل الحصص",
+      noData: "لا توجد مدخلات لهذا التاريخ. أضف مدخلك الأول أعلاه.",
+      sourceCol: "المصدر", amountCol: "المبلغ", pctCol: "% الحصة",
+      cancel: "إلغاء", confirmDelete: "حذف",
+      confirmClearDay: "حذف جميع مدخلات هذا التاريخ؟",
+      confirmClearAll: "حذف كل البيانات؟",
+      confirmClearAllDetail: "سيؤدي هذا إلى محو جميع المدخلات المحفوظة من كل تاريخ بشكل دائم. لا يمكن التراجع عن هذا.",
+      confirmDel: "حذف هذا المدخل؟",
+      toastSaved: "تم حفظ المدخل", toastDeleted: "تم حذف المدخل",
+      toastDeletedMsg: "تمت الإزالة من السجلات",
+      toastCleared: "تم مسح اليوم", toastClearedMsg: "تمت إزالة مدخلات هذا التاريخ",
+      toastClearedAll: "تم مسح كل البيانات", toastClearedAllMsg: "تمت إزالة جميع المدخلات",
+      toastExcel: "تم تصدير Excel", toastExcelMsg: "تم تنزيل report.xlsx",
+      toastPDF: "تم تصدير PDF", toastPDFMsg: "تم تنزيل report.pdf",
+      toastEmpty: "لا يوجد للتصدير", toastEmptyMsg: "أضف المدخلات أولاً",
+      toastError: "مدخل غير صالح", toastErrorMsg: "يرجى تعبئة جميع الحقول بشكل صحيح",
+      toastDateChanged: "تم تغيير التاريخ", toastDateChangedMsg: "تم تحميل المدخلات",
+      toastNoData: "لا توجد بيانات", toastNoDataMsg: "لا توجد مدخلات لهذا التاريخ",
+      toastSavedLocally: "تم الحفظ في المتصفح", toastSavedLocallyMsg: "مخزّن محلياً — لن يُفقد",
+      toastStoreSaved: "تم حفظ معلومات المتجر", toastStoreSavedMsg: "تم تحديث الاسم والموقع",
+      chartSub: "تفصيل الفئة للتاريخ المحدد",
+      chartSubNoData: "لا توجد بيانات لهذا التاريخ",
+      donutSub: "الحصة النسبية لكل مصدر",
+      donutSubNoData: "لا توجد بيانات لهذا التاريخ",
+      donutTotal: "المجموع",
+      modalClearDayTitle: "مسح هذا اليوم؟",
+      modalClearAllTitle: "مسح كل البيانات؟",
+      modalDeleteEntryTitle: "حذف المدخل؟",
+      pdfStore: "المتجر", pdfLocation: "الموقع", pdfDate: "التاريخ", pdfGenerated: "تم الإنشاء",
+      pdfGross: "إجمالي المبيعات", pdfDiscount: "الخصم", pdfNet: "صافي المبيعات",
+      pdfCharts: "الرسوم البيانية", pdfBreakdown: "تفصيل المصادر"
+    }
+  };
+
+  /* ============================================================
+     STATE
+     ============================================================ */
+  let dataByDate = {};
+  let activeDate = todayStr();
+  let currentLang = 'en';
+  let barChartInstance = null;
+  let donutChartInstance = null;
+  let audioCtx = null;
+  let viewedMonth = new Date();
+  let pendingConfirmAction = null;
+  let hiddenSources = {};
+  let storeInfo = { name: '', location: '' };
+
+  const COLORS = ['#c9a961', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6',
+                  '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'];
+  const STORAGE_KEY = 'withstand-sales-data-v3';
+  const STORE_KEY   = 'withstand-store-info-v1';
+  const LANG_KEY    = 'withstand-sales-lang-v3';
+  const SIDEBAR_KEY = 'withstand-sidebar-collapsed';
+
+  /* ============================================================
+     DOM
+     ============================================================ */
+  const htmlRoot        = document.getElementById('htmlRoot');
+  const sidebar         = document.getElementById('sidebar');
+  const collapseBtn     = document.getElementById('collapseBtn');
+  const collapseIcon    = document.getElementById('collapseIcon');
+  const storeNameInput  = document.getElementById('storeName');
+  const storeLocationInput = document.getElementById('storeLocation');
+  const inputSource     = document.getElementById('inputSource');
+  const inputAmount     = document.getElementById('inputAmount');
+  const addBtn          = document.getElementById('addBtn');
+  const clearBtn        = document.getElementById('clearBtn');
+  const topExportExcel  = document.getElementById('topExportExcel');
+  const topExportPDF    = document.getElementById('topExportPDF');
+  const navExportExcel  = document.getElementById('navExportExcel');
+  const navExportPDF    = document.getElementById('navExportPDF');
+  const navClearAll     = document.getElementById('navClearAll');
+  const navDataCount    = document.getElementById('navDataCount');
+  const tableContainer  = document.getElementById('tableContainer');
+  const totalGross      = document.getElementById('totalGross');
+  const totalDiscount   = document.getElementById('totalDiscount');
+  const totalNet        = document.getElementById('totalNet');
+  const barCanvas       = document.getElementById('salesChart');
+  const donutCanvas     = document.getElementById('donutChart');
+  const donutLegend     = document.getElementById('donutLegend');
+  const chartSubtitle   = document.getElementById('chartSubtitle');
+  const donutSubtitle   = document.getElementById('donutSubtitle');
+  const chartTotal      = document.getElementById('chartTotal');
+  const toastContainer  = document.getElementById('toastContainer');
+  const datePickerRoot  = document.getElementById('datePicker');
+  const dateTrigger     = document.getElementById('dateTrigger');
+  const dtValue         = document.getElementById('dtValue');
+  const calendarPopup   = document.getElementById('calendarPopup');
+  const calTitle        = document.getElementById('calTitle');
+  const calGrid         = document.getElementById('calGrid');
+  const prevMonthBtn    = document.getElementById('prevMonthBtn');
+  const nextMonthBtn    = document.getElementById('nextMonthBtn');
+  const prevDayBtn      = document.getElementById('prevDayBtn');
+  const nextDayBtn      = document.getElementById('nextDayBtn');
+  const todayBtn        = document.getElementById('todayBtn');
+  const addEntryDate    = document.getElementById('addEntryDate');
+  const confirmModal    = document.getElementById('confirmModal');
+  const modalIcon       = document.getElementById('modalIcon');
+  const modalTitle      = document.getElementById('modalTitle');
+  const modalText       = document.getElementById('modalText');
+  const modalCancel     = document.getElementById('modalCancel');
+  const modalConfirm    = document.getElementById('modalConfirm');
+
+  /* ============================================================
+     INIT
+     ============================================================ */
+  function init() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) dataByDate = JSON.parse(saved);
+    } catch (e) { dataByDate = {}; }
+
+    try {
+      const si = localStorage.getItem(STORE_KEY);
+      if (si) storeInfo = JSON.parse(si);
+    } catch (e) {}
+
+    try {
+      const sl = localStorage.getItem(LANG_KEY);
+      if (sl && translations[sl]) currentLang = sl;
+    } catch (e) {}
+
+    try {
+      if (localStorage.getItem(SIDEBAR_KEY) === '1') sidebar.classList.add('collapsed');
+    } catch (e) {}
+
+    // Populate store inputs
+    storeNameInput.value = storeInfo.name || '';
+    storeLocationInput.value = storeInfo.location || '';
+
+    updateCollapseIcon();
+    bindEvents();
+    setLanguage();
+
+    activeDate = todayStr();
+    viewedMonth = parseDate(activeDate);
+    syncActiveDateUI();
+    render();
+  }
+
+  /* ============================================================
+     DATE HELPERS
+     ============================================================ */
+  function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  function parseDate(str) {
+    const [y, m, d] = str.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  function formatDateShort(str) {
+    const d = parseDate(str);
+    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  function syncActiveDateUI() {
+    dtValue.textContent = formatDateShort(activeDate);
+    addEntryDate.textContent = activeDate;
+  }
+  function totalEntryCount() { return Object.values(dataByDate).reduce((s, arr) => s + arr.length, 0); }
+  function totalDateCount()  { return Object.keys(dataByDate).length; }
+
+  /* ============================================================
+     STORE INFO SAVE
+     ============================================================ */
+  function saveStoreInfo() {
+    storeInfo.name = storeNameInput.value.trim();
+    storeInfo.location = storeLocationInput.value.trim();
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(storeInfo)); } catch (e) {}
+  }
+
+  /* ============================================================
+     CALENDAR DROPDOWN
+     ============================================================ */
+  function toggleCalendar(force) {
+    const willOpen = typeof force === 'boolean' ? force : !calendarPopup.classList.contains('open');
+    calendarPopup.classList.toggle('open', willOpen);
+    dateTrigger.classList.toggle('open', willOpen);
+    if (willOpen) renderCalendar();
+  }
+
+  function renderCalendar() {
+    const year  = viewedMonth.getFullYear();
+    const month = viewedMonth.getMonth();
+    calTitle.textContent = viewedMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+    const dowNames = currentLang === 'ar'
+      ? ['أحد','إثن','ثلا','أرب','خمي','جمع','سبت']
+      : currentLang === 'hi'
+        ? ['रवि','सोम','मंगल','बुध','गुरु','शुक्र','शनि']
+        : ['S','M','T','W','T','F','S'];
+
+    let html = '';
+    dowNames.forEach(n => { html += `<div class="cal-dow">${n}</div>`; });
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
+
+    const today = todayStr();
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const hasData = (dataByDate[dateStr] || []).length > 0;
+      const classes = ['cal-day'];
+      if (dateStr === today)      classes.push('today');
+      if (dateStr === activeDate) classes.push('active');
+      if (hasData)                classes.push('has-data');
+      html += `<button class="${classes.join(' ')}" data-date="${dateStr}">${day}</button>`;
+    }
+
+    calGrid.innerHTML = html;
+    calGrid.querySelectorAll('.cal-day:not(.empty)').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const d = btn.dataset.date;
+        if (d) { setActiveDate(d, true); toggleCalendar(false); }
+      });
+    });
+  }
+
+  /* ============================================================
+     DATE CHANGE
+     ============================================================ */
+  function setActiveDate(dateStr, showToast = true) {
+    activeDate = dateStr;
+    viewedMonth = parseDate(dateStr);
+    hiddenSources = {};
+    syncActiveDateUI();
+    render();
+    if (showToast) {
+      const t = translations[currentLang];
+      const hasData = (dataByDate[dateStr] || []).length > 0;
+      if (hasData) showToast('info', t.toastDateChanged, formatDateShort(dateStr));
+      else         showToast('warn', t.toastNoData, formatDateShort(dateStr));
+    }
+  }
+
+  function shiftDay(delta) {
+    const d = parseDate(activeDate);
+    d.setDate(d.getDate() + delta);
+    const str = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    setActiveDate(str, true);
+  }
+
+  /* ============================================================
+     AUDIO
+     ============================================================ */
+  function playPing(type) {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const config = {
+        success: { freq1: 880, freq2: 1320, dur: 0.18 },
+        error:   { freq1: 220, freq2: 180,  dur: 0.22 },
+        info:    { freq1: 660, freq2: 990,  dur: 0.16 },
+        export:  { freq1: 523, freq2: 784,  dur: 0.22 },
+        warn:    { freq1: 440, freq2: 330,  dur: 0.20 }
+      }[type] || { freq1: 880, freq2: 1320, dur: 0.18 };
+      const now = audioCtx.currentTime;
+      const o1 = audioCtx.createOscillator(), g1 = audioCtx.createGain();
+      o1.type = 'sine'; o1.frequency.setValueAtTime(config.freq1, now);
+      g1.gain.setValueAtTime(0, now);
+      g1.gain.linearRampToValueAtTime(0.12, now + 0.01);
+      g1.gain.exponentialRampToValueAtTime(0.001, now + config.dur);
+      o1.connect(g1).connect(audioCtx.destination);
+      o1.start(now); o1.stop(now + config.dur);
+
+      const o2 = audioCtx.createOscillator(), g2 = audioCtx.createGain();
+      o2.type = 'sine'; o2.frequency.setValueAtTime(config.freq2, now + 0.06);
+      g2.gain.setValueAtTime(0, now + 0.06);
+      g2.gain.linearRampToValueAtTime(0.08, now + 0.075);
+      g2.gain.exponentialRampToValueAtTime(0.001, now + 0.06 + config.dur * 0.8);
+      o2.connect(g2).connect(audioCtx.destination);
+      o2.start(now + 0.06); o2.stop(now + 0.06 + config.dur);
+    } catch (e) {}
+  }
+
+  /* ============================================================
+     TOASTS
+     ============================================================ */
+  function showToast(type, title, message) {
+    const icons = {
+      success: 'fa-check', error: 'fa-exclamation',
+      info: 'fa-info', warn: 'fa-triangle-exclamation', export: 'fa-download'
+    };
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+    toast.innerHTML = `
+      <div class="toast-icon"><i class="fas ${icons[type] || 'fa-bell'}"></i></div>
+      <div class="toast-body">
+        <div class="toast-title">${escapeHtml(title)}</div>
+        <div class="toast-message">${escapeHtml(message)}</div>
+      </div>
+      <div class="toast-progress"></div>
+    `;
+    toastContainer.appendChild(toast);
+    playPing(type);
+    setTimeout(() => {
+      toast.classList.add('removing');
+      setTimeout(() => toast.remove(), 400);
+    }, 3000);
+  }
+
+  /* ============================================================
+     CONFIRM MODAL
+     ============================================================ */
+  function openConfirm({ title, text, onConfirm, confirmLabel }) {
+    const t = translations[currentLang];
+    modalTitle.textContent = title;
+    modalText.innerHTML = text;
+    modalConfirm.textContent = confirmLabel || t.confirmDelete;
+    pendingConfirmAction = onConfirm;
+    confirmModal.classList.add('open');
+  }
+  function closeConfirm() {
+    confirmModal.classList.remove('open');
+    pendingConfirmAction = null;
+  }
+
+  /* ============================================================
+     EVENTS
+     ============================================================ */
+  function bindEvents() {
+    addBtn.addEventListener('click', addEntry);
+    clearBtn.addEventListener('click', clearDay);
+    topExportExcel.addEventListener('click', exportExcel);
+    topExportPDF.addEventListener('click', exportPDF);
+    navExportExcel.addEventListener('click', (e) => { e.preventDefault(); exportExcel(); });
+    navExportPDF.addEventListener('click', (e) => { e.preventDefault(); exportPDF(); });
+    navClearAll.addEventListener('click', (e) => { e.preventDefault(); clearAllData(); });
+
+    // Store info — save on change
+    storeNameInput.addEventListener('change', () => {
+      saveStoreInfo();
+      showToast('info', translations[currentLang].toastStoreSaved, translations[currentLang].toastStoreSavedMsg);
+    });
+    storeLocationInput.addEventListener('change', () => {
+      saveStoreInfo();
+      showToast('info', translations[currentLang].toastStoreSaved, translations[currentLang].toastStoreSavedMsg);
+    });
+    // Save on blur too
+    storeNameInput.addEventListener('blur', saveStoreInfo);
+    storeLocationInput.addEventListener('blur', saveStoreInfo);
+
+    inputAmount.addEventListener('keydown', e => { if (e.key === 'Enter') addEntry(); });
+    inputSource.addEventListener('keydown', e => { if (e.key === 'Enter') inputAmount.focus(); });
+
+    dateTrigger.addEventListener('click', (e) => { e.stopPropagation(); toggleCalendar(); });
+
+    document.addEventListener('click', (e) => {
+      if (!datePickerRoot.contains(e.target)) toggleCalendar(false);
+    });
+
+    prevMonthBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      viewedMonth = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth() - 1, 1);
+      renderCalendar();
+    });
+    nextMonthBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      viewedMonth = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth() + 1, 1);
+      renderCalendar();
+    });
+
+    prevDayBtn.addEventListener('click', () => shiftDay(-1));
+    nextDayBtn.addEventListener('click', () => shiftDay(1));
+    todayBtn.addEventListener('click', () => setActiveDate(todayStr(), true));
+
+    collapseBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+      updateCollapseIcon();
+      try { localStorage.setItem(SIDEBAR_KEY, sidebar.classList.contains('collapsed') ? '1' : '0'); } catch (e) {}
+    });
+
+    document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item[data-section]').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        const target = document.getElementById('section-' + item.dataset.section);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentLang = btn.dataset.lang;
+        setLanguage();
+        renderCalendar();
+        render();
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { toggleCalendar(false); closeConfirm(); }
+    });
+
+    modalCancel.addEventListener('click', closeConfirm);
+    confirmModal.addEventListener('click', (e) => { if (e.target === confirmModal) closeConfirm(); });
+    modalConfirm.addEventListener('click', () => {
+      if (pendingConfirmAction) pendingConfirmAction();
+      closeConfirm();
+    });
+  }
+
+  function updateCollapseIcon() {
+    const isRTL = currentLang === 'ar';
+    const collapsed = sidebar.classList.contains('collapsed');
+    let iconClass;
+    if (collapsed) iconClass = isRTL ? 'fa-chevron-left' : 'fa-chevron-right';
+    else iconClass = isRTL ? 'fa-chevron-right' : 'fa-chevron-left';
+    collapseIcon.className = 'fas ' + iconClass;
+  }
+
+  /* ============================================================
+     ADD / CLEAR / DELETE
+     ============================================================ */
+  function addEntry() {
+    const source = inputSource.value.trim();
+    const amount = parseFloat(inputAmount.value);
+    const t = translations[currentLang];
+
+    if (!source || isNaN(amount) || amount <= 0) {
+      if (!source) { inputSource.style.borderColor = '#ef4444'; setTimeout(() => inputSource.style.borderColor = '', 1200); }
+      if (isNaN(amount) || amount <= 0) { inputAmount.style.borderColor = '#ef4444'; setTimeout(() => inputAmount.style.borderColor = '', 1200); }
+      showToast('error', t.toastError, t.toastErrorMsg);
+      return;
+    }
+
+    if (!dataByDate[activeDate]) dataByDate[activeDate] = [];
+    dataByDate[activeDate].push({ id: Date.now() + Math.random(), source, amount });
+
+    save();
+    render();
+    renderCalendar();
+
+    showToast('success', t.toastSaved, `${source} · ${amount.toFixed(2)} QAR`);
+    setTimeout(() => showToast('info', t.toastSavedLocally, t.toastSavedLocallyMsg), 350);
+
+    inputSource.value = '';
+    inputAmount.value = '';
+    inputSource.focus();
+  }
+
+  function clearDay() {
+    const t = translations[currentLang];
+    const dayEntries = dataByDate[activeDate] || [];
+    if (dayEntries.length === 0) { showToast('warn', t.toastEmpty, t.toastEmptyMsg); return; }
+
+    openConfirm({
+      title: t.modalClearDayTitle,
+      text: `${t.confirmClearDay}<br><strong>${formatDateShort(activeDate)}</strong>`,
+      confirmLabel: t.confirmDelete,
+      onConfirm: () => {
+        delete dataByDate[activeDate];
+        save();
+        render();
+        renderCalendar();
+        showToast('warn', t.toastCleared, t.toastClearedMsg);
+      }
+    });
+  }
+
+  function clearAllData() {
+    const t = translations[currentLang];
+    const total = totalEntryCount();
+    if (total === 0) { showToast('warn', t.toastEmpty, t.toastEmptyMsg); return; }
+
+    openConfirm({
+      title: t.modalClearAllTitle,
+      text: `${t.confirmClearAllDetail}<br><br><strong>${total} ${total === 1 ? 'entry' : 'entries'}</strong> across <strong>${totalDateCount()} ${totalDateCount() === 1 ? 'date' : 'dates'}</strong>`,
+      confirmLabel: t.confirmDelete,
+      onConfirm: () => {
+        dataByDate = {};
+        hiddenSources = {};
+        save();
+        render();
+        renderCalendar();
+        showToast('error', t.toastClearedAll, t.toastClearedAllMsg);
+      }
+    });
+  }
+
+  function deleteEntry(id) {
+    const t = translations[currentLang];
+    const arr = dataByDate[activeDate] || [];
+    dataByDate[activeDate] = arr.filter(e => e.id !== id);
+    if (dataByDate[activeDate].length === 0) delete dataByDate[activeDate];
+    save();
+    render();
+    renderCalendar();
+    showToast('info', t.toastDeleted, t.toastDeletedMsg);
+  }
+  window.__deleteEntry = deleteEntry;
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(dataByDate)); } catch (e) {}
+  }
+
+  /* ============================================================
+     RENDER
+     ============================================================ */
+  function render() {
+    renderTotals();
+    renderTable();
+    renderBarChart();
+    renderDonutChart();
+    renderSidebarCount();
+  }
+  function currentEntries() { return dataByDate[activeDate] || []; }
+
+  function renderSidebarCount() {
+    const c = totalEntryCount();
+    navDataCount.textContent = c;
+    navDataCount.style.display = c > 0 ? 'inline-block' : 'none';
+  }
+
+  function renderTotals() {
+    let gross = 0, discount = 0;
+    currentEntries().forEach(e => {
+      if (e.source.toLowerCase().includes('discount')) discount += e.amount;
+      else gross += e.amount;
+    });
+    totalGross.textContent    = gross.toFixed(2);
+    totalDiscount.textContent = discount.toFixed(2);
+    totalNet.textContent      = (gross - discount).toFixed(2);
+  }
+
+  function groupEntries(list) {
+    const g = {};
+    list.forEach(e => {
+      if (!g[e.source]) g[e.source] = 0;
+      g[e.source] += e.amount;
+    });
+    return g;
+  }
+
+  function renderTable() {
+    const t = translations[currentLang];
+    const list = currentEntries();
+
+    if (list.length === 0) {
+      tableContainer.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-inbox"></i>
+          <p>${t.noData}</p>
+        </div>`;
+      return;
+    }
+
+    const grouped = groupEntries(list);
+    let grossForPct = 0;
+    Object.keys(grouped).forEach(k => {
+      if (!k.toLowerCase().includes('discount')) grossForPct += grouped[k];
+    });
+
+    let html = `
+      <table class="entries-table">
+        <thead>
+          <tr>
+            <th>${t.sourceCol}</th>
+            <th>${t.amountCol}</th>
+            <th>${t.pctCol}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>`;
+
+    Object.keys(grouped).forEach((source, i) => {
+      const amount = grouped[source];
+      const pct = grossForPct > 0 ? (amount / grossForPct * 100) : 0;
+      const color = COLORS[i % COLORS.length];
+      const isDiscount = source.toLowerCase().includes('discount');
+      html += `
+        <tr>
+          <td>
+            <div class="source-name">
+              <span class="source-dot" style="background:${color}; box-shadow: 0 0 8px ${color}66;"></span>
+              ${escapeHtml(source)}
+            </div>
+          </td>
+          <td class="amt-cell">${amount.toFixed(2)}</td>
+          <td class="pct-cell">${isDiscount ? '—' : pct.toFixed(2) + '%'}</td>
+          <td style="text-align:center;">
+            <button class="delete-btn" onclick="window.__deleteSource('${escapeAttr(source)}')" title="Delete">
+              <i class="fas fa-times"></i>
+            </button>
+          </td>
+        </tr>`;
+    });
+
+    html += `</tbody></table>`;
+    tableContainer.innerHTML = html;
+  }
+
+  window.__deleteSource = function(source) {
+    const t = translations[currentLang];
+    const arr = currentEntries();
+    dataByDate[activeDate] = arr.filter(e => e.source !== source);
+    if (dataByDate[activeDate].length === 0) delete dataByDate[activeDate];
+    save();
+    render();
+    renderCalendar();
+    showToast('info', t.toastDeleted, t.toastDeletedMsg);
+  };
+
+  /* ============================================================
+     BAR CHART
+     ============================================================ */
+  function renderBarChart() {
+    const list = currentEntries();
+    const t = translations[currentLang];
+
+    if (list.length === 0) {
+      chartSubtitle.textContent = t.chartSubNoData;
+      chartTotal.textContent = '0.00 QAR';
+    } else {
+      chartSubtitle.textContent = t.chartSub + ' · ' + formatDateShort(activeDate);
+      const total = list.reduce((s, e) => s + e.amount, 0);
+      chartTotal.textContent = total.toFixed(2) + ' QAR';
+    }
+
+    if (list.length === 0) {
+      if (barChartInstance) { barChartInstance.destroy(); barChartInstance = null; }
+      return;
+    }
+
+    const grouped = groupEntries(list);
+    const labels = Object.keys(grouped);
+    const data = Object.values(grouped);
+    const baseColors = labels.map((_, i) => COLORS[i % COLORS.length]);
+
+    if (barChartInstance) barChartInstance.destroy();
+
+    const ctx = barCanvas.getContext('2d');
+    const chartHeight = barCanvas.parentElement.clientHeight || 340;
+
+    const gradients = baseColors.map(color => {
+      const g = ctx.createLinearGradient(0, 0, 0, chartHeight);
+      g.addColorStop(0, hexToRgba(color, 1));
+      g.addColorStop(1, hexToRgba(color, 0.55));
+      return g;
+    });
+
+    barChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: t.amountCol,
+          data,
+          backgroundColor: gradients,
+          hoverBackgroundColor: baseColors.map(c => hexToRgba(c, 1)),
+          borderColor: baseColors.map(c => hexToRgba(c, 0.9)),
+          borderWidth: 0,
+          borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 4, bottomRight: 4 },
+          borderSkipped: false,
+          barPercentage: 0.7,
+          categoryPercentage: 0.75,
+          maxBarThickness: 70
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 12, right: 8, bottom: 4, left: 4 } },
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#141b2d',
+            borderColor: 'rgba(201,169,97,0.35)',
+            borderWidth: 1,
+            padding: { top: 10, right: 14, bottom: 10, left: 14 },
+            cornerRadius: 10,
+            displayColors: true,
+            boxPadding: 6,
+            usePointStyle: true,
+            titleColor: '#e0c485',
+            titleFont: { size: 12, weight: '700', family: 'Inter' },
+            bodyColor: '#f1f5f9',
+            bodyFont: { size: 13, weight: '600', family: 'Inter' },
+            titleMarginBottom: 6,
+            boxWidth: 10,
+            boxHeight: 10,
+            callbacks: {
+              title: (items) => items[0].label,
+              label: function(ctx) {
+                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                const pct = total > 0 ? (ctx.parsed.y / total * 100).toFixed(1) : 0;
+                return '  ' + ctx.parsed.y.toFixed(2) + ' QAR  ·  ' + pct + '%';
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false, drawBorder: false },
+            border: { display: false },
+            ticks: {
+              color: '#8b97ad',
+              font: { size: 11, weight: '600', family: 'Inter' },
+              padding: 8, maxRotation: 0, autoSkip: false
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(255,255,255,0.05)',
+              drawBorder: false, drawTicks: false
+            },
+            border: { display: false, dash: [3, 3] },
+            ticks: {
+              color: '#8b97ad',
+              font: { size: 11, weight: '500', family: 'Inter' },
+              padding: 10,
+              callback: v => v >= 1000 ? (v/1000).toFixed(1) + 'k' : v
+            }
+          }
+        },
+        animation: { duration: 800, easing: 'easeOutQuart' }
+      }
+    });
+  }
+
+  /* ============================================================
+     DOUGHNUT CHART
+     ============================================================ */
+  function renderDonutChart() {
+    const list = currentEntries();
+    const t = translations[currentLang];
+
+    if (list.length === 0) {
+      donutSubtitle.textContent = t.donutSubNoData;
+      donutLegend.innerHTML = '';
+      if (donutChartInstance) { donutChartInstance.destroy(); donutChartInstance = null; }
+      return;
+    }
+
+    donutSubtitle.textContent = t.donutSub + ' · ' + formatDateShort(activeDate);
+
+    const grouped = groupEntries(list);
+    const labels = Object.keys(grouped);
+    const data = Object.values(grouped);
+    const baseColors = labels.map((_, i) => COLORS[i % COLORS.length]);
+
+    const total = data.reduce((s, v) => s + v, 0);
+
+    const visibleLabels = labels.filter(l => !hiddenSources[l]);
+    const visibleData = visibleLabels.map(l => grouped[l]);
+    const visibleColors = visibleLabels.map(l => baseColors[labels.indexOf(l)]);
+
+    if (donutChartInstance) donutChartInstance.destroy();
+
+    const ctx = donutCanvas.getContext('2d');
+
+    const centerTextPlugin = {
+      id: 'centerText',
+      afterDraw(chart) {
+        const { ctx, chartArea } = chart;
+        if (!chartArea) return;
+        const centerX = (chartArea.left + chartArea.right) / 2;
+        const centerY = (chartArea.top + chartArea.bottom) / 2;
+        const visibleTotal = visibleData.reduce((a, b) => a + b, 0);
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#f1f5f9';
+        ctx.font = '700 22px Inter, sans-serif';
+        ctx.fillText(visibleTotal.toFixed(2), centerX, centerY - 4);
+        ctx.fillStyle = '#8b97ad';
+        ctx.font = '600 10px Inter, sans-serif';
+        ctx.fillText(t.donutTotal.toUpperCase() + ' · QAR', centerX, centerY + 18);
+        ctx.restore();
+      }
+    };
+
+    donutChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: visibleLabels,
+        datasets: [{
+          data: visibleData,
+          backgroundColor: visibleColors.map(c => hexToRgba(c, 0.9)),
+          hoverBackgroundColor: visibleColors,
+          borderColor: '#141b2d',
+          borderWidth: 3,
+          hoverOffset: 10,
+          hoverBorderColor: '#141b2d'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        layout: { padding: 8 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#141b2d',
+            borderColor: 'rgba(201,169,97,0.35)',
+            borderWidth: 1,
+            padding: { top: 10, right: 14, bottom: 10, left: 14 },
+            cornerRadius: 10,
+            displayColors: true,
+            boxPadding: 6,
+            usePointStyle: true,
+            titleColor: '#e0c485',
+            titleFont: { size: 12, weight: '700', family: 'Inter' },
+            bodyColor: '#f1f5f9',
+            bodyFont: { size: 13, weight: '600', family: 'Inter' },
+            boxWidth: 10,
+            boxHeight: 10,
+            callbacks: {
+              label: function(ctx) {
+                const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                const pct = sum > 0 ? (ctx.parsed / sum * 100).toFixed(1) : 0;
+                return '  ' + ctx.parsed.toFixed(2) + ' QAR  ·  ' + pct + '%';
+              }
+            }
+          }
+        },
+        animation: { animateRotate: true, animateScale: false, duration: 900, easing: 'easeOutQuart' }
+      },
+      plugins: [centerTextPlugin]
+    });
+
+    let legendHtml = '';
+    labels.forEach((label, i) => {
+      const val = grouped[label];
+      const pct = total > 0 ? (val / total * 100).toFixed(1) : 0;
+      const color = baseColors[i];
+      const isHidden = hiddenSources[label];
+      legendHtml += `
+        <div class="dl-item" data-source="${escapeAttr(label)}" style="${isHidden ? 'opacity:0.4;' : ''}">
+          <span class="dl-dot" style="background:${color}; box-shadow: 0 0 6px ${color}99;"></span>
+          <span class="dl-name">${escapeHtml(label)}</span>
+          <span class="dl-pct">${pct}%</span>
+        </div>`;
+    });
+    donutLegend.innerHTML = legendHtml;
+
+    donutLegend.querySelectorAll('.dl-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const src = el.dataset.source;
+        hiddenSources[src] = !hiddenSources[src];
+        renderDonutChart();
+      });
+    });
+  }
+
+  function hexToRgba(hex, alpha) {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  /* ============================================================
+     EXPORTS
+     ============================================================ */
+  function exportExcel() {
+    const t = translations[currentLang];
+    if (Object.keys(dataByDate).length === 0) { showToast('warn', t.toastEmpty, t.toastEmptyMsg); return; }
+
+    saveStoreInfo();
+
+    const rows = [
+      ['Withstand · Full Sales Export'],
+      ['Store', storeInfo.name || '—'],
+      ['Location', storeInfo.location || '—'],
+      ['Generated', new Date().toLocaleString()],
+      [],
+      ['Date', 'Source', 'Amount (QAR)']
+    ];
+    const sortedDates = Object.keys(dataByDate).sort();
+    sortedDates.forEach(date => {
+      dataByDate[date].forEach(e => rows.push([date, e.source, e.amount]));
+    });
+
+    const ws1 = XLSX.utils.aoa_to_sheet(rows);
+    ws1['!cols'] = [{ wch: 14 }, { wch: 22 }, { wch: 16 }];
+
+    const summaryRows = [['Date','Gross','Discount','Net','Entries']];
+    sortedDates.forEach(date => {
+      let g = 0, d = 0;
+      dataByDate[date].forEach(e => {
+        if (e.source.toLowerCase().includes('discount')) d += e.amount;
+        else g += e.amount;
+      });
+      summaryRows.push([date, g, d, g - d, dataByDate[date].length]);
+    });
+    const ws2 = XLSX.utils.aoa_to_sheet(summaryRows);
+    ws2['!cols'] = [{ wch: 14 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 10 }];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws1, 'All Entries');
+    XLSX.utils.book_append_sheet(wb, ws2, 'Daily Summary');
+
+    const filename = `withstand-full-sales-${todayStr()}.xlsx`;
+    XLSX.writeFile(wb, filename);
+    showToast('export', t.toastExcel, filename);
+  }
+
+  /* ============================================================
+     EXPORT PDF — with store header, both charts, and breakdown
+     ============================================================ */
+  function exportPDF() {
+    const t = translations[currentLang];
+    const list = currentEntries();
+    if (list.length === 0) { showToast('warn', t.toastEmpty, t.toastEmptyMsg); return; }
+
+    saveStoreInfo();
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+
+    const grouped = groupEntries(list);
+    let gross = 0, discount = 0;
+    Object.keys(grouped).forEach(k => {
+      if (k.toLowerCase().includes('discount')) discount += grouped[k];
+      else gross += grouped[k];
+    });
+
+    // ---------- HEADER ----------
+    doc.setFillColor(10, 14, 26);
+    doc.rect(0, 0, pageW, 110, 'F');
+    doc.setFillColor(201, 169, 97);
+    doc.rect(0, 110, pageW, 3, 'F');
+
+    doc.setTextColor(201, 169, 97);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.text('Withstand', 40, 40);
+
+    doc.setTextColor(241, 245, 249);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Daily Sales Report', 40, 60);
+
+    // Store info in header
+    doc.setFontSize(9);
+    doc.setTextColor(139, 151, 173);
+    doc.text(t.pdfStore + ':', 40, 82);
+    doc.text(t.pdfLocation + ':', 40, 96);
+
+    doc.setTextColor(241, 245, 249);
+    doc.setFont('helvetica', 'bold');
+    doc.text(storeInfo.name || '—', 90, 82);
+    doc.setFont('helvetica', 'normal');
+    doc.text(storeInfo.location || '—', 90, 96);
+
+    // Date + Generated on right
+    doc.setFontSize(9);
+    doc.setTextColor(139, 151, 173);
+    doc.text(t.pdfDate + ':', pageW - 40, 40, { align: 'right' });
+    doc.setTextColor(241, 245, 249);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text(formatDateShort(activeDate), pageW - 40, 55, { align: 'right' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(139, 151, 173);
+    doc.text(t.pdfGenerated + ': ' + new Date().toLocaleString(), pageW - 40, 72, { align: 'right' });
+
+    // ---------- SUMMARY BOXES ----------
+    const boxY = 135, boxH = 60;
+    const boxW = (pageW - 80 - 24) / 3;
+    const summaries = [
+      { label: t.pdfGross, value: gross.toFixed(2), color: [201, 169, 97] },
+      { label: t.pdfDiscount, value: discount.toFixed(2), color: [16, 185, 129] },
+      { label: t.pdfNet, value: (gross - discount).toFixed(2), color: [59, 130, 246] }
+    ];
+    summaries.forEach((s, i) => {
+      const x = 40 + i * (boxW + 12);
+      doc.setFillColor(20, 27, 45);
+      doc.roundedRect(x, boxY, boxW, boxH, 6, 6, 'F');
+      doc.setFillColor(s.color[0], s.color[1], s.color[2]);
+      doc.rect(x, boxY, 4, boxH, 'F');
+      doc.setTextColor(139, 151, 173);
+      doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+      doc.text(s.label.toUpperCase(), x + 14, boxY + 22);
+      doc.setTextColor(241, 245, 249);
+      doc.setFontSize(18);
+      doc.text(s.value, x + 14, boxY + 46);
+    });
+
+    // ---------- CHARTS SECTION ----------
+    const chartsY = boxY + boxH + 30;
+    doc.setTextColor(201, 169, 97);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text(t.pdfCharts, 40, chartsY);
+
+    let currentY = chartsY + 16;
+
+    // Get both chart images from the live canvases
+    const barImage = barChartInstance ? barChartInstance.toBase64Image() : null;
+    const donutImage = donutChartInstance ? donutChartInstance.toBase64Image() : null;
+
+    // Chart dimensions
+    const chartGap = 12;
+    const availableWidth = pageW - 80;
+    // We'll put both charts side by side (bar bigger, donut smaller)
+    const barW = (availableWidth - chartGap) * 0.6;
+    const donutW = (availableWidth - chartGap) * 0.4;
+    const chartH = 220;
+
+    // Chart labels above each
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(241, 245, 249);
+    doc.text(t.chartBar, 40, currentY + 14);
+    doc.text(t.chartDonut, 40 + barW + chartGap, currentY + 14);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(139, 151, 173);
+    doc.text(formatDateShort(activeDate), 40, currentY + 26);
+    doc.text(formatDateShort(activeDate), 40 + barW + chartGap, currentY + 26);
+
+    currentY += 34;
+
+    // White backgrounds for the charts (so they render on white PDF page)
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(40, currentY, barW, chartH, 6, 6, 'F');
+    doc.roundedRect(40 + barW + chartGap, currentY, donutW, chartH, 6, 6, 'F');
+
+    // Add the chart images
+    if (barImage) {
+      try {
+        doc.addImage(barImage, 'PNG', 40, currentY, barW, chartH, undefined, 'FAST');
+      } catch (e) { console.warn('Bar image failed:', e); }
+    }
+    if (donutImage) {
+      try {
+        doc.addImage(donutImage, 'PNG', 40 + barW + chartGap, currentY, donutW, chartH, undefined, 'FAST');
+      } catch (e) { console.warn('Donut image failed:', e); }
+    }
+
+    currentY += chartH + 20;
+
+    // ---------- TABLE SECTION ----------
+    doc.setTextColor(201, 169, 97);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text(t.pdfBreakdown, 40, currentY);
+
+    currentY += 8;
+
+    const tableRows = Object.keys(grouped).map(k => {
+      const amt = grouped[k];
+      const isDisc = k.toLowerCase().includes('discount');
+      const pct = isDisc ? '—' : (gross > 0 ? (amt/gross*100).toFixed(2) + '%' : '0%');
+      return [k, amt.toFixed(2), pct];
+    });
+
+    doc.autoTable({
+      startY: currentY + 6,
+      head: [[t.sourceCol, t.amountCol + ' (QAR)', t.pctCol]],
+      body: tableRows,
+      theme: 'grid',
+      headStyles: { fillColor: [20, 27, 45], textColor: [201, 169, 97], fontStyle: 'bold', fontSize: 10 },
+      bodyStyles: { fillColor: [15, 21, 36], textColor: [241, 245, 249], fontSize: 9 },
+      alternateRowStyles: { fillColor: [20, 27, 45] },
+      columnStyles: {
+        0: { cellWidth: 'auto' },
+        1: { halign: 'right', cellWidth: 120 },
+        2: { halign: 'right', cellWidth: 100 }
+      },
+      styles: { lineColor: [30, 40, 60], lineWidth: 0.5, cellPadding: 7 },
+      margin: { left: 40, right: 40 }
+    });
+
+    // ---------- FOOTER ----------
+    const pages = doc.getNumberOfPages();
+    for (let i = 1; i <= pages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(139, 151, 173);
+      doc.text('Withstand · Analytics', 40, pageH - 20);
+      if (storeInfo.name) {
+        doc.text(storeInfo.name, pageW / 2, pageH - 20, { align: 'center' });
+      }
+      doc.text('Page ' + i + ' / ' + pages, pageW - 40, pageH - 20, { align: 'right' });
+    }
+
+    const safeName = (storeInfo.name || 'report').replace(/[^a-z0-9\-_]/gi, '_').substring(0, 30);
+    const filename = `withstand-${safeName}-${activeDate}.pdf`;
+    doc.save(filename);
+    showToast('export', t.toastPDF, filename);
+  }
+
+  /* ============================================================
+     LANGUAGE
+     ============================================================ */
+  function setLanguage() {
+    const t = translations[currentLang];
+    htmlRoot.lang = currentLang === 'hi' ? 'hi' : currentLang;
+    htmlRoot.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      if (t[key]) el.textContent = t[key];
+    });
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === currentLang);
+    });
+    updateCollapseIcon();
+    try { localStorage.setItem(LANG_KEY, currentLang); } catch (e) {}
+  }
+
+  /* ============================================================
+     UTILITIES
+     ============================================================ */
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+  function escapeAttr(str) {
+    return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
